@@ -1,0 +1,15 @@
+{{- $file_name := .Values.appInitContainer.scriptName }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.appInitContainer.configmapName }}
+  namespace: {{ tpl .Values.global.namespace . }}
+  labels:
+    {{- toYaml .Values.global.labels | trim | nindent 4 }}
+data:
+{{- $file_content := $.Files.Get (printf "files/%s" $file_name) | toYaml | indent 4 }}
+  {{- $file_name | nindent 2 }}:
+    {{- $file_content }}
+
+{{- if .Values.celestiaNode.enabled }}

@@ -1,0 +1,149 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: "{{ .Values.global.name }}-{{ .Values.global.chainId }}-app"
+  namespace: {{ tpl .Values.global.namespace . }}
+  labels:
+    app: celestia-app
+    {{- toYaml .Values.global.labels | trim | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: celestia-app
+      {{- toYaml .Values.global.labels | trim | nindent 6 }}
+  serviceName: "{{ .Values.global.name }}-svc"
+  template:
+    metadata:
+      labels:
+        app: celestia-app
+        {{- toYaml .Values.global.labels | trim | nindent 8 }}
+    spec:
+      {{- if .Values.global.nodePool.enabled }}
+      {{- include "workload.nodepool" . | nindent 6 }}
+      {{- end }}
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: "OnRootMismatch"
+      initContainers:
+        - name: celestia-app-init
+          image: busybox:1.36.0
+          command: ["sh", "-c", "/scripts/{{ .Values.appInitContainer.scriptName }} {{ tpl .Values.celestiaApp.home.path . }}"]
+          env:
+            - name: QUICKSYNC_ENABLED
+              value: "{{ .Values.celestiaApp.snapshotQuickSync.enabled }}"
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            # Init script
+            - name: {{ .Values.appInitContainer.configmapName }}
+              mountPath: /scripts
+            # Celestia app home directory volume
+            - name: {{ tpl .Values.celestiaApp.home.volume.name . }}
+              mountPath: {{ (tpl .Values.celestiaApp.home.path . ) }}
+
+      containers:
+        #### CELESTIA APP NODE ####
+        - name: {{ .Values.global.name }}
+          image: "{{ .Values.celestiaApp.image.registry }}/{{ tpl .Values.celestiaApp.image.repository . }}/{{ tpl .Values.celestiaApp.image.name . }}:{{ .Values.celestiaApp.image.tag }}"
+          command:
+            - celestia-appd
+            - start
+            - --home
+            - {{ tpl .Values.celestiaApp.home.path . }}
+          imagePullPolicy: {{ .Values.celestiaApp.image.pullPolicy }}
+        {{- if .Values.celestiaApp.ports }}
+          ports:
+          {{- range .Values.celestiaApp.ports }}
+            - containerPort: {{ .port }}
+              name: {{ tpl .name $ }}
+              protocol: TCP
+          {{- end }}
+        {{- end }}
+        {{- if .Values.celestiaApp.resources }}
+          resources:
+          {{- toYaml .Values.celestiaApp.resources | trim | nindent 12 }}
+        {{- end }}
+          volumeMounts:
+            # Home directory volume
+            - name: {{ tpl .Values.celestiaApp.home.volume.name . }}
+              mountPath: {{ (tpl .Values.celestiaApp.home.path . ) }}
+              {{- if ne .Values.celestiaApp.files.nodeKey.existingSecret "" }}
+            - mountPath: "{{  (tpl .Values.celestiaApp.home.path .) }}/config/node_key.json"
+              name: {{ .Values.celestiaApp.files.nodeKey.existingSecret }}
+              subPath: "node_key.json"
+              {{- end }}
+              {{- if ne .Values.celestiaApp.files.privateValidatorKey.existingSecret "" }}
+            - mountPath: "{{  tpl .Values.celestiaApp.home.path . }}/config/priv_validator_key.json"
+              name: {{ tpl .Values.celestiaApp.files.privateValidatorKey.existingSecret . }}
+              subPath: "priv_validator_key.json"
+              {{- end }}
+              # Config file volumes
+        {{- if .Values.celestiaApp.files.config }}
+          {{- range .Values.celestiaApp.files.config }}
+            - mountPath: "{{ (tpl $.Values.celestiaApp.home.path $ ) }}/config/{{ .fileName }}"
+              name: {{ .name }}
+              subPath: {{ .fileName }}
+          {{- end }}
+        {{- end }}
+              # Data file volumes
+        {{- if .Values.celestiaApp.files.data }}
+          {{- range .Values.celestiaApp.files.data }}
+            - mountPath: "{{ (tpl $.Values.celestiaApp.home.path $ ) }}/data/{{ .fileName }}"
+              name: {{ .name }}
+              subPath: {{ .fileName }}
+          {{- end }}
+        {{- end }}
+      volumes:
+        # ------------ INIT CELESTIA APP SCRIPT -------------
+        - name: {{ .Values.appInitContainer.configmapName }}
+          configMap:
+            defaultMode: 0744
+            name: {{ .Values.appInitContainer.configmapName }}
+        # ------------ CELESTIA APP ------------
+        # Celestia app home directory volume
+        - name: {{ tpl .Values.celestiaApp.home.volume.name . }}
+          persistentVolumeClaim:
+            claimName: {{ tpl .Values.celestiaApp.home.volume.name . }}
+          # Celestia app config file volumes
+      {{- if .Values.celestiaApp.files.config }}
+        {{- range .Values.celestiaApp.files.config }}
+        - configMap:
+            defaultMode: 420
+            items:
+              - key: {{ .fileName }}
+                path: {{ .fileName }}
+            name: {{ .name }}
+          name: {{ .name }}
+        {{- end }}
+      {{- end }}
+        {{- if .Values.celestiaApp.files.data }}
+          # Celestia app data file volumes
+          {{- range .Values.celestiaApp.files.data }}
+        - configMap:
+            defaultMode: 420
+            items:
+              - key: {{ .fileName }}
+                path: {{ .fileName }}
+            name: {{ .name }}
+          name: {{ .name }}
+          {{- end }}
+        {{- end }}
+        {{- if ne .Values.celestiaApp.files.privateValidatorKey.existingSecret "" }}
+        # Validator private key
+        - name:  {{ tpl .Values.celestiaApp.files.privateValidatorKey.existingSecret . }}
+          secret:
+            secretName: {{ tpl .Values.celestiaApp.files.privateValidatorKey.existingSecret . }}
+            items:
+              - key: "priv_validator_key.json"
+                path: "priv_validator_key.json"
+        {{- end }}
+        {{- if ne .Values.celestiaApp.files.nodeKey.existingSecret "" }}
+        # Nodekey
+        - name:  {{ tpl .Values.celestiaApp.files.nodeKey.existingSecret . }}
+          secret:
+            secretName: {{ tpl .Values.celestiaApp.files.nodeKey.existingSecret . }}
+            items:
+              - key: "node_key.json"
+                path: "node_key.json"
+        {{- end }}
