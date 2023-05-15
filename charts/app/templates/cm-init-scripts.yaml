@@ -11,5 +11,3 @@ data:
 {{- $file_content := $.Files.Get (printf "files/%s" $file_name) | toYaml | indent 4 }}
   {{- $file_name | nindent 2 }}:
     {{- $file_content }}
-
-{{- if .Values.celestiaNode.enabled }}
