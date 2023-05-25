@@ -25,10 +25,6 @@ spec:
       {{- include "workload.nodepool" . | nindent 6 }}
       {{- end }}
       initContainers:
-        - name: wait-for-celestia-rpc
-          image: appropriate/curl
-          command: [ "sh", "-c", "echo 'Waiting for celestia app node to be ready...'; until curl -s -o /dev/null -w '%{http_code}' -m 10 {{ .Values.celestiaApp.ports.rpc.name }}.{{ tpl .Values.global.namespace . }}:{{ .Values.celestiaApp.ports.rpc.port }}/status | grep -q 200; do sleep 5; done" ]
-          imagePullPolicy: IfNotPresent
         - name: celestia-node-init
           image: busybox:1.36.0
           command: ["sh", "-c", "/scripts/{{ .Values.nodeInitContainer.scriptName }} {{ tpl .Values.celestiaNode.home.path . }}"]
@@ -50,7 +46,7 @@ spec:
             - {{ .Values.celestiaNode.type }}
             - start
             - --core.ip
-            - {{ .Values.celestiaApp.ports.rpc.name }}.{{ tpl .Values.global.namespace . }}
+            - {{ .Values.celestiaNode.coreIp }}
             - --p2p.network
             - {{ .Values.celestiaNode.network }}
           imagePullPolicy: {{ .Values.celestiaNode.image.pullPolicy }}

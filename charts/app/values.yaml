@@ -34,12 +34,6 @@ appInitContainer:
   configmapName: init-celestia-app
   scriptName: init-celestia-app.sh
 
-## Init container script for Celestia Node
-##
-nodeInitContainer:
-  configmapName: init-celestia-node
-  scriptName: init-celestia-node.sh
-
 ## Celestia App node configuration
 ##
 celestiaApp:
@@ -139,6 +133,3 @@ celestiaApp:
   #   memory: 10Gi
   # limits:
   #   memory: 10Gi
-
-## Celestia Node configuration
-##
