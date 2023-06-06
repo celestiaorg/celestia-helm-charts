@@ -24,10 +24,21 @@ spec:
       {{- if .Values.global.nodePool.enabled }}
       {{- include "workload.nodepool" . | nindent 6 }}
       {{- end }}
+      securityContext:
+        fsGroup: 10001
+        fsGroupChangePolicy: "OnRootMismatch"
       initContainers:
         - name: celestia-node-init
-          image: busybox:1.36.0
-          command: ["sh", "-c", "/scripts/{{ .Values.nodeInitContainer.scriptName }} {{ tpl .Values.celestiaNode.home.path . }}"]
+          image: "{{ .Values.celestiaNode.image.registry }}/{{ tpl .Values.celestiaNode.image.repository . }}/{{ tpl .Values.celestiaNode.image.name . }}:{{ .Values.celestiaNode.image.tag }}"
+          env:
+            - name: CELESTIA_CUSTOM
+              value: "mocha-2:1181AF8EAE5DDF3CBBFF3BF3CC44C5B795DF5094F5A0CC0AE52921ECCA0AF3C8"
+          command:
+            - ./bin/celestia
+            - {{ .Values.celestiaNode.type }}
+            - init
+            - --node.store
+            - {{ tpl .Values.celestiaNode.home.path . }}
           imagePullPolicy: IfNotPresent
           volumeMounts:
             # Init script
@@ -40,16 +51,20 @@ spec:
         #### CELESTIA NODE ####
         - name: "{{ .Values.global.name }}-{{ .Values.celestiaNode.type }}"
           image: "{{ .Values.celestiaNode.image.registry }}/{{ tpl .Values.celestiaNode.image.repository . }}/{{ tpl .Values.celestiaNode.image.name . }}:{{ .Values.celestiaNode.image.tag }}"
-          #Disclaimer: since a certain version you will need to replace './celestia' to 'celestia'
+          env:
+            - name: CELESTIA_CUSTOM
+              value: "mocha-2:1181AF8EAE5DDF3CBBFF3BF3CC44C5B795DF5094F5A0CC0AE52921ECCA0AF3C8"
           command:
-            - ./celestia
+            - ./bin/celestia
             - {{ .Values.celestiaNode.type }}
             - start
             - --core.ip
             - {{ .Values.celestiaNode.coreIp }}
-            - --p2p.network
-            - {{ .Values.celestiaNode.network }}
+
           imagePullPolicy: {{ .Values.celestiaNode.image.pullPolicy }}
+          securityContext:
+            runAsUser: 10001
+            runAsGroup: 10001
         {{- if .Values.celestiaNode.ports }}
           ports:
           {{- range .Values.celestiaNode.ports }}

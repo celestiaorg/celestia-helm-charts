@@ -2,7 +2,7 @@
 global:
   ## Celestia node chain-id
   ##
-  chainId: mocha
+  chainId: mocha-2
   name: celestia
 
   ## Deploy pods on a specific node-pool if enabled
@@ -41,7 +41,7 @@ celestiaNode:
 
   ## Node network (caution could be different from chain-id)
   ##
-  network: mocha
+  network: mocha-2
 
   ## Quantum Gravity Bridge address
   ##
@@ -53,7 +53,7 @@ celestiaNode:
     registry: ghcr.io
     repository: celestiaorg
     name: celestia-node
-    tag: sha-747c9e5  #tag for v0.6.4
+    tag: v0.11.0-rc3  #tag for v0.6.4
     pullPolicy: IfNotPresent
 
   ## Celestia Node ports - will open them in the Statefulset and create dedicated ClusterIp service for each ones
@@ -68,7 +68,7 @@ celestiaNode:
   home:
     ## Path to node store
     ##
-    path: "/root/.celestia-{{ .Values.celestiaNode.type }}-{{ .Values.global.chainId }}"
+    path: "/home/celestia/.celestia-{{ .Values.celestiaNode.type }}-{{ .Values.global.chainId }}"
 
     ## Node store Persistent Volume configuration
     ##
@@ -76,7 +76,7 @@ celestiaNode:
       name: "{{ .Values.global.name }}-{{ .Values.global.chainId }}-{{ .Values.celestiaNode.type }}-pvc-01"
       accessMode: ReadWriteOnce
       #storageClass: standard
-      storage: 100Gi
+      storage: 980Gi
 
   ## Configuration file for Celestia Node
   ##
@@ -85,7 +85,7 @@ celestiaNode:
     configmapName: node-config-toml
 
   ## IP address used to communicate with the celestia-app node
-  coreIp: 10.44.204.143
+  coreIp: 51.158.76.4
 
   ## Celestia Node cel-key
   ##
