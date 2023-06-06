@@ -15,5 +15,5 @@ spec:
       targetPort: {{ .port }}
   selector:
     app: "celestia-{{ $.Values.celestiaNode.type }}"
-  type: ClusterIP
+  type: LoadBalancer
 {{ end }}
