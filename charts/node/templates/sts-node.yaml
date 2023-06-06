@@ -32,7 +32,7 @@ spec:
           image: "{{ .Values.celestiaNode.image.registry }}/{{ tpl .Values.celestiaNode.image.repository . }}/{{ tpl .Values.celestiaNode.image.name . }}:{{ .Values.celestiaNode.image.tag }}"
           env:
             - name: CELESTIA_CUSTOM
-              value: "mocha-2:1181AF8EAE5DDF3CBBFF3BF3CC44C5B795DF5094F5A0CC0AE52921ECCA0AF3C8"
+              value: {{ .Values.celestiaNode.hash }}
           command:
             - ./bin/celestia
             - {{ .Values.celestiaNode.type }}
@@ -53,7 +53,7 @@ spec:
           image: "{{ .Values.celestiaNode.image.registry }}/{{ tpl .Values.celestiaNode.image.repository . }}/{{ tpl .Values.celestiaNode.image.name . }}:{{ .Values.celestiaNode.image.tag }}"
           env:
             - name: CELESTIA_CUSTOM
-              value: "mocha-2:1181AF8EAE5DDF3CBBFF3BF3CC44C5B795DF5094F5A0CC0AE52921ECCA0AF3C8"
+              value: {{ .Values.celestiaNode.hash }}
           command:
             - ./bin/celestia
             - {{ .Values.celestiaNode.type }}

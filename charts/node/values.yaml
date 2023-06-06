@@ -43,6 +43,10 @@ celestiaNode:
   ##
   network: mocha-2
 
+  ## Custom network hash address
+  ##
+  hash: "mocha-2:1181AF8EAE5DDF3CBBFF3BF3CC44C5B795DF5094F5A0CC0AE52921ECCA0AF3C8"
+
   ## Quantum Gravity Bridge address
   ##
   ethereumAddress: ""
