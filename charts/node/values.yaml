@@ -47,6 +47,10 @@ celestiaNode:
   ##
   hash: "mocha-2:1181AF8EAE5DDF3CBBFF3BF3CC44C5B795DF5094F5A0CC0AE52921ECCA0AF3C8"
 
+  ## Bootstrapper enabled value
+  ##
+  bootstrapper: false
+
   ## Quantum Gravity Bridge address
   ##
   ethereumAddress: ""
@@ -90,6 +94,9 @@ celestiaNode:
 
   ## IP address used to communicate with the celestia-app node
   coreIp: 51.158.76.4
+
+  libp2pkey:
+    filename: OAZHALLLMV4Q
 
   ## Celestia Node cel-key
   ##
