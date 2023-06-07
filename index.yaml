@@ -57,6 +57,16 @@ entries:
   node:
   - apiVersion: v2
     appVersion: v0.11.0-rc3
+    created: "2023-06-07T09:51:37.923745471Z"
+    description: A Helm chart for deploying celestia node on Kubernetes
+    digest: 5349dfce58e5d3060885b09598514eb34005684377d4b2fc26c504a7953e184f
+    name: node
+    type: application
+    urls:
+    - https://github.com/celestiaorg/celestia-helm-charts/releases/download/node-v0.11.0-rc3/node-v0.11.0-rc3.tgz
+    version: v0.11.0-rc3
+  - apiVersion: v2
+    appVersion: v0.11.0-rc3
     created: "2023-06-06T14:46:24.501240574Z"
     description: A Helm chart for deploying celestia node on Kubernetes
     digest: 3f702f42255f9fb3bd7db3587fc1af720dec9463f2eb5f8a2c3dc9ab76da3707
@@ -65,4 +75,4 @@ entries:
     urls:
     - https://github.com/celestiaorg/celestia-helm-charts/releases/download/node-0.1.2/node-0.1.2.tgz
     version: 0.1.2
-generated: "2023-06-06T14:46:24.501247974Z"
+generated: "2023-06-07T09:51:37.923763071Z"
