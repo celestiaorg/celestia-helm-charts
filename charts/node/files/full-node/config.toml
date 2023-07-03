@@ -67,3 +67,13 @@
     WriteDeadline = "8s"
     ReadDeadline = "1m0s"
     RangeRequestTimeout = "10s"
+  [Header.Client]
+    MaxHeadersPerRangeRequest = 64
+    RangeRequestTimeout = "8s"
+
+[DASer]
+  SamplingRange = 100
+  ConcurrencyLimit = 6
+  BackgroundStoreInterval = "10m0s"
+  SampleFrom = 1
+  SampleTimeout = "3m0s"
