@@ -61,7 +61,7 @@ celestiaNode:
     registry: ghcr.io
     repository: celestiaorg
     name: celestia-node
-    tag: v0.11.0-rc6  #tag for v0.11.0-rc3
+    tag: v0.11.0-rc6  #tag for v0.11.0-rc6
     pullPolicy: IfNotPresent
 
   ## Celestia Node ports - will open them in the Statefulset and create dedicated ClusterIp service for each ones
