@@ -87,7 +87,7 @@ spec:
             - name: {{ tpl .Values.celestiaNode.config.configmapName . }}
               mountPath: "{{ tpl .Values.celestiaNode.home.path . }}/{{ .Values.celestiaNode.config.file }}"
               subPath: {{ .Values.celestiaNode.config.file }}
-            {{- if .Values.celestiaNode.bootstrapper.true}}
+            {{- if eq .Values.celestiaNode.bootstrapper true -}}
             - mountPath: "{{ tpl .Values.celestiaNode.home.path . }}/keys/{{ .Values.celestiaNode.libp2pkey.filename }}"
               name: "libp2pkey"
               subPath: {{ .Values.celestiaNode.libp2p.fileName }}
@@ -111,7 +111,7 @@ spec:
         - name: {{ tpl .Values.celestiaNode.home.volume.name . }}
           persistentVolumeClaim:
             claimName: {{ tpl .Values.celestiaNode.home.volume.name . }}
-        {{- if .Values.celestiaNode.bootstrapper.true}}
+        {{- if eq .Values.celestiaNode.bootstrapper true -}}
         # Bootstrapper libp2pkey
         - name: libp2pkey
           secret:
