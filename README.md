@@ -9,3 +9,4 @@ Helm charts for deploying Celestia Applications on Kubernetes
 helm repo add celestia https://celestiaorg.github.io/celestia-helm-charts/
 ```
 
+### Usage
