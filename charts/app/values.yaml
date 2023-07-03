@@ -1,0 +1,135 @@
+---
+# Default values for deploying Celestia
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+##
+global:
+  ## Celestia node chain-id
+  ##
+  chainId: mocha
+  name: celestia
+
+  ## Deploy pods on a specific node-pool if enabled
+  ##
+  nodePool:
+    enabled: false
+    ## If enabled, provide kv pair for node-pool affinity
+    # key: "env"
+    # value: "prod"
+
+  namespace: "{{ .Values.global.name }}-{{ .Values.global.chainId }}"
+
+  ## Common labels for chart resources
+  ##
+  labels:
+    app.kubernetes.io/instance: "celestia"
+    app.kubernetes.io/name: "celestia"
+    app.kubernetes.io/component: "celestia"
+    app.kubernetes.io/managed-by: "helm"
+
+## Init container script for Celestia App
+##
+appInitContainer:
+  configmapName: init-celestia-app
+  scriptName: init-celestia-app.sh
+
+## Celestia App node configuration
+##
+celestiaApp:
+
+  ## celestia App docker image
+  ##
+  image:
+    registry: registry.hub.docker.com
+    repository: jeremymc99
+    name: celestia-app
+    tag: v0.11.1
+    pullPolicy: IfNotPresent
+
+  ## Celestia App home directory
+  ##
+  home:
+    ## Path to Celestia home directory
+    ##
+    path: "/{{ .Values.global.name }}/.celestia-appd"
+
+    ## Celestia App home directory Persistent Volume configuration
+    ##
+    volume:
+      name: "{{ .Values.global.name }}-{{ .Values.global.chainId }}-app-pvc-01"
+      accessMode: ReadWriteOnce
+      #storageClass: standard
+      storage: 100Gi
+
+  ## Deploy a Load Balancer for Celestia App RPC endpoint
+  ##
+  rpcLoadBalancer: false
+
+  ## Celestia App node ports - will open them in the Statefulset and create dedicated service for each ones
+  #
+  # All Service we be deployed as ClusterIp, except P2P that will be LoadBalancer and RPC one if .Values.celestia.rpcLoadBalancer is set to true
+  #
+  ##
+  ports:
+    grpc:
+      port: 9090
+      name: "grpc"
+    p2p:
+      port: 26656
+      name: "p2p"
+    rpc:
+      port: 26657
+      name: "rpc"
+    metrics:
+      port: 26660
+      name: "metrics"
+
+  ## Configuration files for the Celestia node
+  ##
+  files:
+
+    ## Files to store to the /data folder (.celestia-appd/data/)
+    ##
+    data:
+      - name: validator-state-json
+        fileName: priv_validator_state.json
+
+    ## Files to store to the /config folder (.celestia-appd/config/)
+    ##
+    config:
+      - name: app-toml
+        fileName: app.toml
+      - name: config-toml
+        fileName: config.toml
+      - name: client-toml
+        fileName: client.toml
+      ## You can provide the address-book directly
+      ##
+      - name: address-book
+        fileName: addrbook.json
+
+    ## You can provide your celestia-app node_key.json file using a secret, if not one will be generated at start
+    ##
+    nodeKey:
+      existingSecret: ""
+
+    ## You can provide your celestia-app priv_validator_key.json file using a secret
+    #  /!\ warning: not recommended for valdidator, use remote signer instead (see Horcrux or TMKMS)
+    ##
+    privateValidatorKey:
+      existingSecret: ""
+
+  ## Enable quick sync (it will download a <24h snapshot in an initContainer before starting the node)
+  ##
+  snapshotQuickSync:
+    enabled: false
+
+  ## Define resources requests and limits for single Pods.
+  ##
+  resources: {}
+  # requests:
+  #   cpu: 200m
+  #   memory: 10Gi
+  # limits:
+  #   memory: 10Gi

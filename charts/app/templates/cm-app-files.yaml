@@ -1,0 +1,34 @@
+# CM for all the files inside the /tendermint_home/config
+{{ range .Values.celestiaApp.files.config }}
+---
+#TODO: add app- at beginning of cm name
+{{- $file_name := .fileName }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .name }}
+  namespace: {{ tpl $.Values.global.namespace $ }}
+  labels:
+    {{- toYaml $.Values.global.labels | trim | nindent 4 }}
+data:
+  {{- $file_content := $.Files.Get (printf "files/config/%s" $file_name) | toYaml | indent 4 }}
+  {{- $file_name | nindent 2 }}:
+    {{- $file_content }}
+{{ end }}
+
+# CM for all the files inside the /tendermint_home/data
+{{ range .Values.celestiaApp.files.data }}
+---
+{{- $file_name := .fileName }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .name }}
+  namespace: {{ tpl $.Values.global.namespace $ }}
+  labels:
+    {{- toYaml $.Values.global.labels | trim | nindent 4 }}
+data:
+  {{- $file_content := $.Files.Get (printf "files/data/%s" $file_name) | toYaml | indent 4 }}
+  {{- $file_name | nindent 2 }}:
+    {{- $file_content }}
+{{ end }}

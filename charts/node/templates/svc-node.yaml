@@ -1,0 +1,19 @@
+{{ range .Values.celestiaNode.ports }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    {{- toYaml $.Values.global.labels | trim | nindent 4 }}
+  name: "{{ $.Values.celestiaNode.type }}-{{ .name }}"
+  namespace: {{ tpl $.Values.global.namespace $ }}
+spec:
+  ports:
+    - name: {{ .name }}
+      port: {{ .port }}
+      protocol: TCP
+      targetPort: {{ .port }}
+  selector:
+    app: "celestia-{{ $.Values.celestiaNode.type }}"
+  type: LoadBalancer
+{{ end }}
