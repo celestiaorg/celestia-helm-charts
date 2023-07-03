@@ -1,0 +1,15 @@
+apiVersion: v1
+entries:
+  node:
+  - apiVersion: v2
+    appVersion: v0.11.0-rc6
+    created: "2023-07-03T16:47:02.755645505Z"
+    description: A Helm chart for deploying celestia node on Kubernetes
+    digest: aee4608ba1ec94ccd0cc958edcf4014369745df2e719831af68b3823815fbed1
+    icon: https://company-223625.frontify.com/d/JoSwaZS4Mjpj/guidelines#/basics/logos/purple-watermark
+    name: node
+    type: application
+    urls:
+    - https://github.com/celestiaorg/celestia-helm-charts/releases/download/node-0.11.0-rc6/node-0.11.0-rc6.tgz
+    version: 0.11.0-rc6
+generated: "2023-07-03T16:47:02.755651105Z"
