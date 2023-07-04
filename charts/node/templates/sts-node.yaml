@@ -54,6 +54,8 @@ spec:
             - start
             - --core.ip
             - {{ .Values.celestiaNode.coreIp }}
+            - --p2p.network
+            - {{ .Values.celestiaNode.network }}
           imagePullPolicy: {{ .Values.celestiaNode.image.pullPolicy }}
           securityContext:
             runAsUser: 10001
