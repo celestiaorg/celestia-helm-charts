@@ -1,0 +1,26 @@
+apiVersion: v1
+entries:
+  app:
+  - apiVersion: v2
+    appVersion: 0.11.1
+    created: "2023-07-04T10:25:00.269595756Z"
+    description: Celestia App Helm chart for Kubernetes
+    digest: f134f1ae27ed2f348d55a2626bf30481e27bc475279f0c6245cffc3283e12aff
+    name: app
+    type: application
+    urls:
+    - https://github.com/celestiaorg/celestia-helm-charts/releases/download/app-0.11.1/app-0.11.1.tgz
+    version: 0.11.1
+  node:
+  - apiVersion: v2
+    appVersion: 0.11.0-rc6
+    created: "2023-07-04T10:25:00.435765237Z"
+    description: A Helm chart for deploying celestia node on Kubernetes
+    digest: f165209fa8e0eaf7acabe4106fae016161d031ae9a66bbb8d776f59efcea4573
+    icon: https://company-223625.frontify.com/d/JoSwaZS4Mjpj/guidelines#/basics/logos/purple-watermark
+    name: node
+    type: application
+    urls:
+    - https://github.com/celestiaorg/celestia-helm-charts/releases/download/node-0.11.0-rc6/node-0.11.0-rc6.tgz
+    version: 0.11.0-rc6
+generated: "2023-07-04T10:25:00.435769637Z"
