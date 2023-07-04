@@ -16,8 +16,9 @@ helm search repo celestia
 ```
 
 if you want to see dev or release candidate charts
-
 ```shell
+helm search repo celestia --devel --version 0.11.0-dev.2
+# or
 helm search repo celestia --devel --version 0.11.0-rc.7
 ```
 
@@ -32,6 +33,6 @@ kubectl create namespace celestia-arabica-9
 For using pre-release/dev versions use the flag `--version`
 Example for running a light-node with arabica testnet: 
 ```shell
-helm install light-node celestia/node -f examples/light.yaml --version 0.11.0-dev.1
+helm install light-node celestia/node -f examples/light.yaml --version 0.11.0-dev.2
 ```
 
