@@ -90,7 +90,7 @@ spec:
             {{- if .Values.celestiaNode.bootstrapper -}}
             - mountPath: "{{ tpl .Values.celestiaNode.home.path . }}/keys/{{ .Values.celestiaNode.libp2pkey.filename }}"
               name: "libp2pkey"
-              subPath: {{ .Values.celestiaNode.libp2p.fileName }}
+              subPath: {{ .Values.celestiaNode.libp2pkey.fileName }}
             {{- end }}
             {{- if .Values.celestiaNode.celKey.enabled }}
             - mountPath: "{{ tpl .Values.celestiaNode.home.path . }}/keys/keyring-test/{{ .Values.celestiaNode.celKey.address.fileName }}"
