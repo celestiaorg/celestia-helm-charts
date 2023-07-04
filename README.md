@@ -12,5 +12,5 @@ helm repo add celestia https://celestiaorg.github.io/celestia-helm-charts/
 ### Usage
 
 ```
-helm repo search celestia
+helm search repo celestia
 ```
