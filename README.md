@@ -14,3 +14,6 @@ helm repo add celestia https://celestiaorg.github.io/celestia-helm-charts/
 ```
 helm search repo celestia
 ```
+
+
+### Installation
