@@ -30,9 +30,6 @@ spec:
       initContainers:
         - name: celestia-node-init
           image: "{{ .Values.celestiaNode.image.registry }}/{{ tpl .Values.celestiaNode.image.repository . }}/{{ tpl .Values.celestiaNode.image.name . }}:{{ .Values.celestiaNode.image.tag }}"
-          env:
-            - name: CELESTIA_CUSTOM
-              value: {{ .Values.celestiaNode.hash }}
           command:
             - ./bin/celestia
             - {{ .Values.celestiaNode.type }}
@@ -51,18 +48,12 @@ spec:
         #### CELESTIA NODE ####
         - name: "{{ .Values.global.name }}-{{ .Values.celestiaNode.type }}"
           image: "{{ .Values.celestiaNode.image.registry }}/{{ tpl .Values.celestiaNode.image.repository . }}/{{ tpl .Values.celestiaNode.image.name . }}:{{ .Values.celestiaNode.image.tag }}"
-          env:
-            - name: CELESTIA_CUSTOM
-              value: {{ .Values.celestiaNode.hash }}
-            - name: CELESTIA_BOOTSTRAPPER
-              value: {{ .Values.celestiaNode.bootstrapper }}
           command:
             - ./bin/celestia
             - {{ .Values.celestiaNode.type }}
             - start
             - --core.ip
             - {{ .Values.celestiaNode.coreIp }}
-
           imagePullPolicy: {{ .Values.celestiaNode.image.pullPolicy }}
           securityContext:
             runAsUser: 10001
@@ -87,11 +78,6 @@ spec:
             - name: {{ tpl .Values.celestiaNode.config.configmapName . }}
               mountPath: "{{ tpl .Values.celestiaNode.home.path . }}/{{ .Values.celestiaNode.config.file }}"
               subPath: {{ .Values.celestiaNode.config.file }}
-            {{- if .Values.celestiaNode.bootstrapper -}}
-            - mountPath: "{{ tpl .Values.celestiaNode.home.path . }}/keys/{{ .Values.celestiaNode.libp2pkey.filename }}"
-              name: "libp2pkey"
-              subPath: {{ .Values.celestiaNode.libp2pkey.fileName }}
-            {{- end }}
             {{- if .Values.celestiaNode.celKey.enabled }}
             - mountPath: "{{ tpl .Values.celestiaNode.home.path . }}/keys/keyring-test/{{ .Values.celestiaNode.celKey.address.fileName }}"
               name: "celkey-address-file"
@@ -111,12 +97,6 @@ spec:
         - name: {{ tpl .Values.celestiaNode.home.volume.name . }}
           persistentVolumeClaim:
             claimName: {{ tpl .Values.celestiaNode.home.volume.name . }}
-        {{- if .Values.celestiaNode.bootstrapper -}}
-        # Bootstrapper libp2pkey
-        - name: libp2pkey
-          secret:
-            secretName: {{ .Values.celestiaNode.libp2pkey.filename }}
-        {{- end }}
         {{- if .Values.celestiaNode.celKey.enabled }}
         # Cel-key files
         - name: celkey-address-file
