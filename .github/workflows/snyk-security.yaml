@@ -21,16 +21,16 @@ jobs:
 
     steps:
       - name: Run Snyk to check configuration files for security issues
-      - uses: actions/checkout@v3
+        uses: actions/checkout@v3
 
       - name: Setup Helm
-      - uses: azure/setup-helm@v3
+        uses: azure/setup-helm@v3
 
       - name: Generate the Helm Template
         run: helm template charts/app/ --output-dir ./output
 
       - name: Snyk IaC Scanner
-      - uses: snyk/actions/iac@master
+        uses: snyk/actions/iac@master
         continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
@@ -41,6 +41,6 @@ jobs:
           # file: your-file-to-test.yaml
 
       - name: Upload result to GitHub Code Scanning
-      - uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: snyk.sarif
