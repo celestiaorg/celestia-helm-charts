@@ -40,7 +40,7 @@ jobs:
       - name: Snyk Helm Scanner Celestia
         run: |
           snyk iac test ./output/ --sarif-file-output=snyk.sariff
-          ls -al
+          ls
         continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
