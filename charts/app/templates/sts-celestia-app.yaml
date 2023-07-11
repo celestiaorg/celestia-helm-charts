@@ -29,7 +29,7 @@ spec:
       initContainers:
         - name: celestia-app-init
           image: busybox:1.36.0
-          command: ["sh", "-c", "/scripts/{{ .Values.appInitContainer.scriptName }} {{ tpl .Values.celestiaApp.home.path . }} {{ tpl .Values.celestiaApp.chainId }}"]
+          command: ["sh", "-c", "/scripts/{{ .Values.appInitContainer.scriptName }} {{ tpl .Values.celestiaApp.home.path . }} {{ .Values.celestiaApp.chainId }}"]
           env:
             - name: QUICKSYNC_ENABLED
               value: "{{ .Values.celestiaApp.snapshotQuickSync.enabled }}"
