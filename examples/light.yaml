@@ -2,7 +2,7 @@
 global:
   ## Celestia node chain-id
   ##
-  chainId: mocha-2
+  chainId: arabica-9
   name: celestia
 
   ## Deploy pods on a specific node-pool if enabled
@@ -37,15 +37,11 @@ celestiaNode:
   ## There are 3 different type of nodes: bridge, light and full.
   #  note: when running a validator it's recommended to run a bridge node also
   ##
-  type: bridge
+  type: light
 
   ## Node network (caution could be different from chain-id)
   ##
-  network: mocha-2
-
-  ## Quantum Gravity Bridge address
-  ##
-  ethereumAddress: ""
+  network: arabica-9
 
   ## celestia node docker image
   ##
@@ -68,7 +64,7 @@ celestiaNode:
   home:
     ## Path to node store
     ##
-    path: "/home/celestia/.celestia-{{ .Values.celestiaNode.type }}-{{ .Values.global.chainId }}"
+    path: "/home/celestia/.celestia-light-arabica-9"
 
     ## Node store Persistent Volume configuration
     ##
@@ -76,7 +72,7 @@ celestiaNode:
       name: "{{ .Values.global.name }}-{{ .Values.global.chainId }}-{{ .Values.celestiaNode.type }}-pvc-01"
       accessMode: ReadWriteOnce
       #storageClass: standard
-      storage: 980Gi
+      storage: 100Gi
 
   ## Configuration file for Celestia Node
   ##
@@ -85,7 +81,7 @@ celestiaNode:
     configmapName: node-config-toml
 
   ## IP address used to communicate with the celestia-app node
-  coreIp:
+  coreIp: http://consensus-validator-arabica-9.celestia-arabica.com
 
   libp2pkey:
     filename: OAZHALLLMV4Q
@@ -107,7 +103,7 @@ celestiaNode:
 
   ## Define resources requests and limits for single Pods.
   ##
-  resources: {}
+  resources: { }
   # requests:
   #   cpu: 200m
   #   memory: 10Gi
@@ -125,3 +121,4 @@ monitoring:
     app.kubernetes.io/name: prometheus
     app.kubernetes.io/part-of: kube-prometheus
     app: "celestia"
+
