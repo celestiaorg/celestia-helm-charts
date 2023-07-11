@@ -23,12 +23,6 @@ jobs:
       - name: Run Snyk to check configuration files for security issues
         uses: actions/checkout@v3
 
-      - name: Setup Helm
-        uses: azure/setup-helm@v3
-
-      - name: Generate the Helm Template
-        run: helm template charts/app/ --output-dir ./output
-
       - name: Snyk IaC Scanner
         uses: snyk/actions/iac@master
         continue-on-error: true
