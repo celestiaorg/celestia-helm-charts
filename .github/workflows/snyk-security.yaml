@@ -35,9 +35,9 @@ jobs:
         uses: snyk/actions/setup@master
 
       - name : Setup Go
-        uses: actions/setup-go@v1
+        uses: actions/setup-go@v4
         with:
-          go-version: "1.22"
+          go-version: '1.22'
 
       - name: Snyk Helm Scanner Celestia
         run: snyk iac test ./output/app
