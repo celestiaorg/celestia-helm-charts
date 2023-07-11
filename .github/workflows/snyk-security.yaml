@@ -38,7 +38,9 @@ jobs:
         uses: actions/setup-go@v4
 
       - name: Snyk Helm Scanner Celestia
-        run: snyk iac test ./output/ --sarif-file-output=snyk.sariff
+        run: |
+          snyk iac test ./output/ --sarif-file-output=snyk.sariff
+          ls -al
         continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
