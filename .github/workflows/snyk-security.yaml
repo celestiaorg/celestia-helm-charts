@@ -1,15 +1,3 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
-# A sample workflow which checks out your Infrastructure as Code Configuration files,
-# such as Kubernetes, Helm & Terraform and scans them for any security issues.
-# The results are then uploaded to GitHub Security Code Scanning
-#
-# For more examples, including how to limit scans to only high-severity issues
-# and fail PR checks, see https://github.com/snyk/actions/
-
 name: Snyk Infrastructure as Code
 
 on:
@@ -22,32 +10,40 @@ on:
     - cron: '24 8 * * 4'
 
 permissions:
-  contents: read
+  contents: read # for actions/checkout to fetch code
+  security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
+  actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
 
 jobs:
   snyk:
-    permissions:
-      contents: read # for actions/checkout to fetch code
-      security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
-      actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
+    name: Run Snyk to check the helm charts
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
       - name: Run Snyk to check configuration files for security issues
-        # Snyk can be used to break the build when it detects security issues.
-        # In this case we want to upload the issues to GitHub Code Scanning
+        uses: actions/checkout@v3
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v3
+
+      - name: Generate the Helm Template
+        run: |
+          helm template charts/app/ --output-dir ./output/app
+          helm template charts/node/ --output-dir ./output/node
+
+      - name: Setup Snyk
+        uses: snyk/actions/setup@master
+
+      - name : Setup Go
+        uses: actions/setup-go@v4
+
+      - name: Snyk Helm Scanner Celestia
+        run: |
+          snyk iac test ./output/ --sarif-file-output=snyk.sarif
         continue-on-error: true
-        uses: snyk/actions/iac@master
         env:
-          # In order to use the Snyk Action you will need to have a Snyk API token.
-          # More details in https://github.com/snyk/actions#getting-your-snyk-token
-          # or you can signup for free at https://snyk.io/login
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        #with:
-          # Add the path to the configuration file that you would like to test.
-          # For example `deployment.yaml` for a Kubernetes deployment manifest
-          # or `main.tf` for a Terraform configuration file
-          # file: your-file-to-test.yaml
+
       - name: Upload result to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v2
         with:
