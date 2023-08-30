@@ -3,9 +3,9 @@
   ShutdownTimeout = "20s"
 
 [Core]
-  IP = "0.0.0.0"
-  RPCPort = "0"
-  GRPCPort = "0"
+  IP = ""
+  RPCPort = "26657"
+  GRPCPort = "9090"
 
 [State]
   KeyringAccName = ""

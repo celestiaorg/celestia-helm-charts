@@ -3,7 +3,7 @@
 
 # NOTE: Any path below can be absolute (e.g. "/var/myawesomeapp/data") or
 # relative to the home directory (e.g. "data"). The home directory is
-# "$HOME/.tendermint" by default, but could be changed via $TMHOME env variable
+# "$HOME/.cometbft" by default, but could be changed via $CMTHOME env variable
 # or --home cmd flag.
 
 #######################################################################
@@ -11,11 +11,11 @@
 #######################################################################
 
 # TCP or UNIX socket address of the ABCI application,
-# or the name of an ABCI application compiled in with the Tendermint binary
+# or the name of an ABCI application compiled in with the CometBFT binary
 proxy_app = "tcp://127.0.0.1:26658"
 
 # A custom human readable name for this node
-moniker = "jmc"
+moniker = "helmval"
 
 # If this node is many blocks behind the tip of the chain, FastSync
 # allows them to catchup quickly by downloading blocks in parallel
@@ -63,7 +63,7 @@ priv_validator_key_file = "config/priv_validator_key.json"
 # Path to the JSON file containing the last sign state of a validator
 priv_validator_state_file = "data/priv_validator_state.json"
 
-# TCP or UNIX socket address for Tendermint to listen on for
+# TCP or UNIX socket address for CometBFT to listen on for
 # connections from an external PrivValidator process
 priv_validator_laddr = ""
 
@@ -88,7 +88,7 @@ filter_peers = false
 [rpc]
 
 # TCP or UNIX socket address for the RPC server to listen on
-laddr = "tcp://0.0.0.0:26657"
+laddr = "tcp://127.0.0.1:26657"
 
 # A list of origins a cross-domain request can be executed from
 # Default value '[]' disables cors support
@@ -176,17 +176,17 @@ max_body_bytes = 8388608
 max_header_bytes = 1048576
 
 # The path to a file containing certificate that is used to create the HTTPS server.
-# Might be either absolute path or path related to Tendermint's config directory.
+# Might be either absolute path or path related to CometBFT's config directory.
 # If the certificate is signed by a certificate authority,
 # the certFile should be the concatenation of the server's certificate, any intermediates,
 # and the CA's certificate.
-# NOTE: both tls_cert_file and tls_key_file must be present for Tendermint to create HTTPS server.
+# NOTE: both tls_cert_file and tls_key_file must be present for CometBFT to create HTTPS server.
 # Otherwise, HTTP server is run.
 tls_cert_file = ""
 
 # The path to a file containing matching private key that is used to create the HTTPS server.
-# Might be either absolute path or path related to Tendermint's config directory.
-# NOTE: both tls-cert-file and tls-key-file must be present for Tendermint to create HTTPS server.
+# Might be either absolute path or path related to CometBFT's config directory.
+# NOTE: both tls-cert-file and tls-key-file must be present for CometBFT to create HTTPS server.
 # Otherwise, HTTP server is run.
 tls_key_file = ""
 
@@ -206,13 +206,13 @@ laddr = "tcp://0.0.0.0:26656"
 # and will introspect on the listener or use UPnP
 # to figure out the address. ip and port are required
 # example: 159.89.10.97:26656
-external_address = "35.205.241.151:26656"
+external_address = ""
 
 # Comma separated list of seed nodes to connect to
-seeds = "1afcd97b0bf289700378e18b45dc1f927917bba0@65.109.92.79:11656,eaa763cde89fcf5a8fe44274a5ee3ce24bce2c5b@64.227.18.169:26656,0d0f0e4a149b50a96207523a5408611dae2796b6@198.199.82.109:26656,c2870ce12cfb08c4ff66c9ad7c49533d2bd8d412@178.170.47.171:26656"
+seeds = ""
 
 # Comma separated list of nodes to keep persistent connections to
-persistent_peers = "59c2ef26d8f466b054b0418d9b4d706e67f8558d@109.123.246.227:26656,96ecf3360b7bf664cd101288a23f6d0e71fdc345@167.86.101.213:26656,01a31c666a4cdc4a00b65419ea7d00239db9bf83@167.86.102.105:26656,be8f5ad66ad06dad35f999f051d2901f7f63449e@188.187.26.108:26656,a9fe225aceeb79b25a0e6ff8f2082d4b3979e7bf@212.227.29.198:26656,af4ff900c65bb01262e0d3cdb346ff8c632d7e97@95.111.243.138:26656,39220ad7d6bf5c9ca293fd6003de918338bcc3d3@38.242.197.16:26656,d5519e378247dfb61dfe90652d1fe3e2b3005a5b@65.109.68.190:26656"
+persistent_peers = ""
 
 # UPNP port forwarding
 upnp = false
@@ -255,7 +255,7 @@ pex = true
 # peers. If another node asks it for addresses, it responds and disconnects.
 #
 # Does not work if the peer-exchange reactor is disabled.
-seed_mode = "true"
+seed_mode = false
 
 # Comma separated list of peer IDs to keep private (will not be gossiped to other peers)
 private_peer_ids = ""
@@ -273,10 +273,16 @@ dial_timeout = "3s"
 [mempool]
 
 # Mempool version to use:
-#   1) "v0" - (default) FIFO mempool.
-#   2) "v1" - prioritized mempool.
+#   1) "v0" - FIFO mempool.
+#   2) "v1" - (default) prioritized mempool.
+#   3) "v2" - content addressable transaction pool
 version = "v1"
 
+# Recheck (default: true) defines whether CometBFT should recheck the
+# validity for all remaining transaction in the mempool after a block.
+# Since a block affects the application state, some transactions in the
+# mempool may become invalid. If this does not apply to your application,
+# you can disable rechecking.
 recheck = true
 broadcast = true
 wal_dir = ""
@@ -295,7 +301,7 @@ cache_size = 10000
 # Do not remove invalid transactions from the cache (default: false)
 # Set to true if it's not possible for any invalid transaction to become valid
 # again in the future.
-keep-invalid-txs-in-cache = true
+keep-invalid-txs-in-cache = false
 
 # Maximum size of a single transaction.
 # NOTE: the max size of a tx transmitted over the network is {max_tx_bytes}.
@@ -320,7 +326,7 @@ ttl-duration = "0s"
 # Note, if ttl-duration is also defined, a transaction will be removed if it
 # has existed in the mempool at least ttl-num-blocks number of blocks or if
 # it's insertion time into the mempool is beyond ttl-duration.
-ttl-num-blocks = 15
+ttl-num-blocks = 10
 
 #######################################################
 ###         State Sync Configuration Options        ###
@@ -365,8 +371,8 @@ chunk_fetchers = "4"
 
 # Fast Sync version to use:
 #   1) "v0" (default) - the legacy fast sync implementation
-#   2) "v1" - refactor of v0 version for better testability
-#   2) "v2" - complete redesign of v0, optimized for testability & readability
+#   "v1" and "v2" are disabled. They have been deprecated and will
+#   be completely removed in one of the upcoming releases
 version = "v0"
 
 #######################################################
@@ -391,7 +397,7 @@ timeout_precommit_delta = "500ms"
 # How long we wait after committing a block, before starting on the new
 # height (this gives us a chance to receive some more precommits, even
 # though we already have +2/3).
-timeout_commit = "25s"
+timeout_commit = "11s"
 
 # How many blocks to look back to check existence of the node's consensus votes before joining consensus
 # When non-zero, the node will panic upon restart
@@ -411,6 +417,17 @@ peer_gossip_sleep_duration = "100ms"
 peer_query_maj23_sleep_duration = "2s"
 
 #######################################################
+###         Storage Configuration Options           ###
+#######################################################
+[storage]
+
+# Set to true to discard ABCI responses from the state store, which can save a
+# considerable amount of disk space. Set to false to ensure ABCI responses are
+# persisted. ABCI responses are required for /block_results RPC queries, and to
+# reindex events in the command-line tool.
+discard_abci_responses = false
+
+#######################################################
 ###   Transaction Indexer Configuration Options     ###
 #######################################################
 [tx_index]
@@ -426,7 +443,7 @@ peer_query_maj23_sleep_duration = "2s"
 # 		- When "kv" is chosen "tx.height" and "tx.hash" will always be indexed.
 #   3) "psql" - the indexer services backed by PostgreSQL.
 # When "kv" or "psql" is chosen "tx.height" and "tx.hash" will always be indexed.
-indexer = "null"
+indexer = "kv"
 
 # The PostgreSQL connection configuration, the connection format:
 #   postgresql://<user>:<password>@<host>:<port>/<db>?<opts>
@@ -452,4 +469,20 @@ prometheus_listen_addr = ":26660"
 max_open_connections = 3
 
 # Instrumentation namespace
-namespace = "tendermint"
+namespace = "cometbft"
+
+# The URL of the influxdb instance to use for remote event
+# collection. If empty, remote event collection is disabled.
+influx_url = ""
+
+# The influxdb token to use for remote event collection.
+influx_token = ""
+
+# The influxdb bucket to use for remote event collection.
+influx_bucket = "e2e"
+
+# The influxdb org to use for event remote collection.
+influx_org = "celestia"
+
+# The size of the batches that are sent to the database.
+influx_batch_size = 20

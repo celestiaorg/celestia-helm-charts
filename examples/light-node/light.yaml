@@ -49,7 +49,7 @@ celestiaNode:
     registry: ghcr.io
     repository: celestiaorg
     name: celestia-node
-    tag: v0.11.0-rc6
+    tag: 0cf4a49 # v0.11.0-rc8.1 fixed for arabica-9
     pullPolicy: IfNotPresent
 
   ## Celestia Node ports - will open them in the Statefulset and create dedicated ClusterIp service for each ones

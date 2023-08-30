@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: "{{ .Values.global.name }}-{{ .Values.global.chainId }}-app"
+  name: "{{ .Values.global.name }}-{{ .Values.global.network }}-app"
   namespace: {{ tpl .Values.global.namespace . }}
   labels:
     app: celestia-app
@@ -20,16 +20,19 @@ spec:
         app: celestia-app
         {{- toYaml .Values.global.labels | trim | nindent 8 }}
     spec:
+      securityContext:
+        fsGroup: 10001
+        fsGroupChangePolicy: "OnRootMismatch"
       {{- if .Values.global.nodePool.enabled }}
       {{- include "workload.nodepool" . | nindent 6 }}
       {{- end }}
-      securityContext:
-        fsGroup: 1000
-        fsGroupChangePolicy: "OnRootMismatch"
       initContainers:
         - name: celestia-app-init
           image: busybox:1.36.0
-          command: ["sh", "-c", "/scripts/{{ .Values.appInitContainer.scriptName }} {{ tpl .Values.celestiaApp.home.path . }} {{ tpl .Values.celestiaApp.chainId }}"]
+          command: ["sh", "-c", "whoami; chown -R 10001:10001 {{ (tpl .Values.celestiaApp.home.path . ) }}; {{ (tpl .Values.celestiaApp.home.path . ) }}/scripts/{{ .Values.appInitContainer.scriptName }} {{ tpl .Values.celestiaApp.home.path . }} {{ tpl .Values.celestiaApp.chainId . }}"]
+          securityContext:
+            runAsUser: 0
+            runAsGroup: 0
           env:
             - name: QUICKSYNC_ENABLED
               value: "{{ .Values.celestiaApp.snapshotQuickSync.enabled }}"
@@ -37,7 +40,7 @@ spec:
           volumeMounts:
             # Init script
             - name: {{ .Values.appInitContainer.configmapName }}
-              mountPath: /scripts
+              mountPath: "{{ (tpl .Values.celestiaApp.home.path . ) }}/scripts"
             # Celestia app home directory volume
             - name: {{ tpl .Values.celestiaApp.home.volume.name . }}
               mountPath: {{ (tpl .Values.celestiaApp.home.path . ) }}
@@ -52,6 +55,10 @@ spec:
             - --home
             - {{ tpl .Values.celestiaApp.home.path . }}
           imagePullPolicy: {{ .Values.celestiaApp.image.pullPolicy }}
+          securityContext:
+            runAsUser: 10001
+            runAsGroup: 10001
+            allowPrivilegeEscalation: false
         {{- if .Values.celestiaApp.ports }}
           ports:
           {{- range .Values.celestiaApp.ports }}
