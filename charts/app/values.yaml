@@ -5,9 +5,10 @@
 
 ##
 global:
-  ## Celestia node chain-id
+  ## Celestia App / CometBFT name (used for namespace, service, etc)
   ##
-  chainId: arabica
+  # used as a suffix for namespace, service, pvc, etc
+  network: arabica-9
   name: celestia
 
   ## Deploy pods on a specific node-pool if enabled
@@ -52,15 +53,21 @@ celestiaApp:
   home:
     ## Path to Celestia home directory
     ##
-    path: "/home/{{ .Values.global.name }}/.celestia-appd"
+    path: "/home/{{ .Values.global.name }}"
 
     ## Celestia App home directory Persistent Volume configuration
     ##
     volume:
-      name: "{{ .Values.global.name }}-{{ .Values.global.network }}-app-pvc-01"
+      name: "{{ .Values.global.name }}-app-pvc-01"
       accessMode: ReadWriteOnce
       #storageClass: standard
-      storage: 1000Gi
+      storage: 10Gi
+
+    configVolume:
+      name: "{{ .Values.global.name }}-config-pvc-01"
+      accessMode: ReadWriteOnce
+      storage: 1Gi
+
 
   ## Deploy a Load Balancer for Celestia App RPC endpoint
   ##

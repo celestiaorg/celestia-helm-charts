@@ -32,7 +32,7 @@ nodeInitContainer:
 ## Celestia Node configuration
 ##
 celestiaNode:
-  enabled: "true"
+  enabled: true
 
   ## There are 3 different type of nodes: bridge, light and full.
   #  note: when running a validator it's recommended to run a bridge node also
@@ -81,7 +81,7 @@ celestiaNode:
     configmapName: node-config-toml
 
   ## IP address used to communicate with the celestia-app node
-  coreIp: 192.168.182.106
+  coreIp: 192.168.175.146
 
   libp2pkey:
     filename: OAZHALLLMV4Q
@@ -91,7 +91,7 @@ celestiaNode:
   celKey:
     ## If not enabled, a cel-key will be generated for you at node start
     ##
-    enabled: "false"
+    enabled: false
 
   ## If .Values.celestiaNode.celkey.enabled is true, then you will need to provide secret names and file names of your key files (see README)
   # address:

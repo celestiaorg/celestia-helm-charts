@@ -52,6 +52,8 @@ spec:
             - ./bin/celestia
             - {{ .Values.celestiaNode.type }}
             - start
+            - --node.store
+            - {{ tpl .Values.celestiaNode.home.path . }}
             - --core.ip
             - {{ .Values.celestiaNode.coreIp }}
             - --p2p.network
@@ -71,7 +73,7 @@ spec:
         {{- if .Values.celestiaNode.resources }}
           resources:
             {{- toYaml .Values.celestiaNode.resources | trim | nindent 12 }}
-              {{- end }}
+        {{- end }}
           volumeMounts:
             # Node home directory
             - name: {{ tpl .Values.celestiaNode.home.volume.name . }}
