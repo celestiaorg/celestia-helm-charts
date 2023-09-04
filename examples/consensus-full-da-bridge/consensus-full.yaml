@@ -59,9 +59,15 @@ celestiaApp:
     ##
     volume:
       name: "{{ .Values.global.name }}-app-pvc-01"
-      accessMode: ReadWriteMany
+      accessMode: ReadWriteOnce
       #storageClass: standard
       storage: 10Gi
+
+    configVolume:
+      name: "{{ .Values.global.name }}-config-pvc-01"
+      accessMode: ReadWriteOnce
+      storage: 1Gi
+
 
   ## Deploy a Load Balancer for Celestia App RPC endpoint
   ##

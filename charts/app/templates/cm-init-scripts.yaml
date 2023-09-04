@@ -1,5 +1,3 @@
-{{- $file_name := .Values.appInitContainer.scriptName }}
----
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -8,6 +6,11 @@ metadata:
   labels:
     {{- toYaml .Values.global.labels | trim | nindent 4 }}
 data:
-{{- $file_content := $.Files.Get (printf "files/%s" $file_name) | toYaml | indent 4 }}
-  {{- $file_name | nindent 2 }}:
-    {{- $file_content }}
+{{- $path := "files/" }}
+{{- $ctx := . }}
+{{- range $filePath, $bytes := .Files.Glob (printf "%s**" $path) }}
+  {{- $file := replace $path "" $filePath }}
+  {{- $safeFile := replace "/" "_" $file }}  # Replace '/' with '_'
+  {{- $safeFile | nindent 2 }}: |
+{{ $ctx.Files.Get $filePath | nindent 4 }}
+{{- end }}
