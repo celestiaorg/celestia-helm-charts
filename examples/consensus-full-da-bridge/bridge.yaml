@@ -1,0 +1,124 @@
+##
+global:
+  ## Celestia node chain-id
+  ##
+  chainId: arabica-9
+  name: celestia
+
+  ## Deploy pods on a specific node-pool if enabled
+  ##
+  nodePool:
+    enabled: false
+    ## If enabled, provide kv pair for node-pool affinity
+    # key: "env"
+    # value: "prod"
+
+  namespace: "{{ .Values.global.name }}-{{ .Values.global.chainId }}"
+
+  ## Common labels for chart resources
+  ##
+  labels:
+    app.kubernetes.io/instance: "celestia"
+    app.kubernetes.io/name: "celestia"
+    app.kubernetes.io/component: "celestia"
+    app.kubernetes.io/managed-by: "helm"
+
+## Init container script for Celestia Node
+##
+nodeInitContainer:
+  configmapName: init-celestia-node
+  scriptName: init-celestia-node.sh
+
+## Celestia Node configuration
+##
+celestiaNode:
+  enabled: "true"
+
+  ## There are 3 different type of nodes: bridge, light and full.
+  #  note: when running a validator it's recommended to run a bridge node also
+  ##
+  type: bridge
+
+  ## Node network (caution could be different from chain-id)
+  ##
+  network: arabica-9
+
+  ## celestia node docker image
+  ##
+  image:
+    registry: ghcr.io
+    repository: celestiaorg
+    name: celestia-node
+    tag: 0cf4a49 # v0.11.0-rc8.1 fixed for arabica-9
+    pullPolicy: IfNotPresent
+
+  ## Celestia Node ports - will open them in the Statefulset and create dedicated ClusterIp service for each ones
+  ##
+  ports:
+    rpc:
+      port: 26658
+      name: rpc
+
+  ## Celestia Node home directory
+  ##
+  home:
+    ## Path to node store
+    ##
+    path: "/home/celestia/.celestia-bridge-arabica-9"
+
+    ## Node store Persistent Volume configuration
+    ##
+    volume:
+      name: "{{ .Values.global.name }}-{{ .Values.global.chainId }}-{{ .Values.celestiaNode.type }}-pvc-01"
+      accessMode: ReadWriteOnce
+      #storageClass: standard
+      storage: 100Gi
+
+  ## Configuration file for Celestia Node
+  ##
+  config:
+    file: config.toml
+    configmapName: node-config-toml
+
+  ## IP address used to communicate with the celestia-app node
+  coreIp: 192.168.182.106
+
+  libp2pkey:
+    filename: OAZHALLLMV4Q
+
+  ## Celestia Node cel-key
+  ##
+  celKey:
+    ## If not enabled, a cel-key will be generated for you at node start
+    ##
+    enabled: "false"
+
+  ## If .Values.celestiaNode.celkey.enabled is true, then you will need to provide secret names and file names of your key files (see README)
+  # address:
+  #   secretName: "celkey-address"
+  #   fileName: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.address"
+  # validatorInfo:
+  #   secretName: "celkey-validator-info"
+  #   fileName: "my_celes_key.info"
+
+  ## Define resources requests and limits for single Pods.
+  ##
+  resources: { }
+  # requests:
+  #   cpu: 200m
+  #   memory: 10Gi
+  # limits:
+  #   memory: 10Gi
+
+## Prometheus configuration to collect metrics - it will deploy a ServiceMonitor and RBAC resources to allow Prometheus server to collect Celestia node metrics
+##
+monitoring:
+  enabled: false
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/component: prometheus
+    app.kubernetes.io/instance: k8s
+    app.kubernetes.io/name: prometheus
+    app.kubernetes.io/part-of: kube-prometheus
+    app: "celestia"
+
