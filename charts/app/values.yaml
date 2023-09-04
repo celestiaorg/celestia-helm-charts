@@ -42,7 +42,7 @@ celestiaApp:
   ## celestia App docker image
   ##
   image:
-    registry:  ghcr.io
+    registry: ghcr.io
     repository: celestiaorg
     name: celestia-app
     tag: v1.0.0-rc7
@@ -60,7 +60,7 @@ celestiaApp:
     volume:
       name: "{{ .Values.global.name }}-app-pvc-01"
       accessMode: ReadWriteOnce
-      #storageClass: standard
+      # storageClass: standard
       storage: 10Gi
 
     configVolume:

@@ -71,7 +71,7 @@ celestiaNode:
     volume:
       name: "{{ .Values.global.name }}-{{ .Values.global.chainId }}-{{ .Values.celestiaNode.type }}-pvc-01"
       accessMode: ReadWriteOnce
-      #storageClass: standard
+      # storageClass: standard
       storage: 100Gi
 
   ## Configuration file for Celestia Node
@@ -121,4 +121,3 @@ monitoring:
     app.kubernetes.io/name: prometheus
     app.kubernetes.io/part-of: kube-prometheus
     app: "celestia"
-
