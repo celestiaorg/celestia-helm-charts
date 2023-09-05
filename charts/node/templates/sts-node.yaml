@@ -39,7 +39,7 @@ spec:
           imagePullPolicy: IfNotPresent
           volumeMounts:
             # Init script
-            - name: {{ .Values.nodeInitContainer.configmapName }}
+            - name: {{ .Values.nodeInitContainer.configmapName }}-{{ .Values.celestiaNode.type }}
               mountPath: /scripts
             # Celestia Node node home directory
             - name: {{ tpl .Values.celestiaNode.home.volume.name . }}
@@ -79,7 +79,7 @@ spec:
             - name: {{ tpl .Values.celestiaNode.home.volume.name . }}
               mountPath: {{ tpl .Values.celestiaNode.home.path . }}
               # Node config.toml file
-            - name: {{ tpl .Values.celestiaNode.config.configmapName . }}
+            - name: {{ tpl .Values.celestiaNode.config.configmapName . }}-{{ tpl .Values.celestiaNode.type . }}
               mountPath: "{{ tpl .Values.celestiaNode.home.path . }}/{{ .Values.celestiaNode.config.file }}"
               subPath: {{ .Values.celestiaNode.config.file }}
             {{- if .Values.celestiaNode.celKey.enabled }}
@@ -92,10 +92,10 @@ spec:
             {{- end }}
       volumes:
         # ------------ INIT  SCRIPT -------------
-        - name: {{ .Values.nodeInitContainer.configmapName }}
+        - name: {{ .Values.nodeInitContainer.configmapName }}-{{ .Values.celestiaNode.type }}
           configMap:
             defaultMode: 0744
-            name: {{ .Values.nodeInitContainer.configmapName }}
+            name: {{ .Values.nodeInitContainer.configmapName }}-{{ .Values.celestiaNode.type }}
         # ------------ CELESTIA NODE ------------
         # Home directory volume
         - name: {{ tpl .Values.celestiaNode.home.volume.name . }}
@@ -116,6 +116,6 @@ spec:
             items:
               - key: {{ .Values.celestiaNode.config.file }}
                 path: {{ .Values.celestiaNode.config.file }}
-            name: {{ .Values.celestiaNode.config.configmapName }}
-          name: {{ .Values.celestiaNode.config.configmapName }}
+            name: {{ .Values.celestiaNode.config.configmapName }}-{{ .Values.celestiaNode.type }}
+          name: {{ .Values.celestiaNode.config.configmapName }}-{{ .Values.celestiaNode.type }}
 {{- end }}

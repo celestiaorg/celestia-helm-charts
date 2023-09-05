@@ -8,7 +8,7 @@ global:
   ## Celestia App / CometBFT name (used for namespace, service, etc)
   ##
   # used as a suffix for namespace, service, pvc, etc
-  network: arabica-9
+  network: arabica-10
   name: celestia
 
   ## Deploy pods on a specific node-pool if enabled
@@ -38,14 +38,14 @@ appInitContainer:
 ## Celestia App node configuration
 ##
 celestiaApp:
-  chainId: arabica-9
+  chainId: arabica-10
   ## celestia App docker image
   ##
   image:
-    registry:  ghcr.io
+    registry: ghcr.io
     repository: celestiaorg
     name: celestia-app
-    tag: v1.0.0-rc7
+    tag: v1.0.0-rc13
     pullPolicy: IfNotPresent
 
   ## Celestia App home directory
@@ -60,7 +60,7 @@ celestiaApp:
     volume:
       name: "{{ .Values.global.name }}-app-pvc-01"
       accessMode: ReadWriteOnce
-      #storageClass: standard
+      # storageClass: standard
       storage: 10Gi
 
     configVolume:

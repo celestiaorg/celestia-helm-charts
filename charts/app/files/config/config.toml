@@ -212,7 +212,7 @@ external_address = ""
 seeds = ""
 
 # Comma separated list of nodes to keep persistent connections to
-persistent_peers = "a44e141f7a3190a83384b40487da870e855fe9e5@51.158.130.152:26656"
+persistent_peers = "4686b0b70a8d1a2b24cbe0f856ba2b52a38a02b1@full.consensus.celestia-arabica-10.com:26656, 25c2e83bde060c51bb117c6526e14053bd4a83ec@consensus-validator.celestia-arabica-10.com:26656, ad8e16b0b78cd44239590c49da75ba074c02e1c4@consensus-full.celestia-arabica-10.com:26656"
 
 # UPNP port forwarding
 upnp = false

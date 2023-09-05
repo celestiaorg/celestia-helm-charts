@@ -2,7 +2,7 @@
 global:
   ## Celestia node chain-id
   ##
-  chainId: arabica-9
+  chainId: arabica-10
   name: celestia
 
   ## Deploy pods on a specific node-pool if enabled
@@ -26,7 +26,7 @@ global:
 ## Init container script for Celestia Node
 ##
 nodeInitContainer:
-  configmapName: init-celestia-node
+  configmapName: init-celestia
   scriptName: init-celestia-node.sh
 
 ## Celestia Node configuration
@@ -41,7 +41,7 @@ celestiaNode:
 
   ## Node network (caution could be different from chain-id)
   ##
-  network: arabica-9
+  network: arabica-10
 
   ## celestia node docker image
   ##
@@ -49,7 +49,7 @@ celestiaNode:
     registry: ghcr.io
     repository: celestiaorg
     name: celestia-node
-    tag: 0cf4a49  # v0.11.0-rc8.1 fixed for arabica-9
+    tag: v0.11.0-rc10
     pullPolicy: IfNotPresent
 
   ## Celestia Node ports - will open them in the Statefulset and create dedicated ClusterIp service for each ones
@@ -81,6 +81,7 @@ celestiaNode:
     configmapName: node-config-toml
 
   ## IP address used to communicate with the celestia-app node
+  ## Please provide your own IP address that is a consensus full node / validator
   coreIp: 192.168.175.146
 
   libp2pkey:
