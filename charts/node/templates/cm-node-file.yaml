@@ -3,7 +3,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Values.celestiaNode.config.configmapName }}
+  name: {{ .Values.celestiaNode.config.configmapName }}-{{ .Values.celestiaNode.type }}
   namespace: {{ tpl .Values.global.namespace . }}
   labels:
     {{- toYaml .Values.global.labels | trim | nindent 4 }}
