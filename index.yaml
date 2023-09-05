@@ -2,6 +2,29 @@ apiVersion: v1
 entries:
   app:
   - apiVersion: v2
+    appVersion: v1.0.0-rc.7
+    created: "2023-09-05T08:32:01.299303664Z"
+    description: Celestia App Helm chart for Kubernetes
+    digest: 6a9bfcd972b669ed79b96b1ba977e6de3b10eb96a39464d833ce9726db0ae295
+    maintainers:
+    - email: devops@celestia.org
+      name: sysrex
+      url: celestia.org
+    - email: devops@celestia.org
+      name: Bidon15
+      url: celestia.org
+    - email: devops@celestia.org
+      name: jrmanes
+      url: celestia.org
+    - email: devops@celestia.org
+      name: smuu
+      url: celestia.org
+    name: app
+    type: application
+    urls:
+    - https://github.com/celestiaorg/celestia-helm-charts/releases/download/app-1.0.0-rc.7/app-1.0.0-rc.7.tgz
+    version: 1.0.0-rc.7
+  - apiVersion: v2
     appVersion: 0.11.1
     created: "2023-07-04T10:25:00.269595756Z"
     description: Celestia App Helm chart for Kubernetes
@@ -34,6 +57,30 @@ entries:
     urls:
     - https://github.com/celestiaorg/celestia-helm-charts/releases/download/node-0.11.0-rc6/node-0.11.0-rc6.tgz
     version: 0.11.0-rc6
+  - apiVersion: v2
+    appVersion: 0.11.0-rc8.1
+    created: "2023-09-05T08:32:01.536389727Z"
+    description: A Helm chart for deploying celestia node on Kubernetes
+    digest: 170d828e2e99c2eaa12b981d8743c9bf624b5432e969fbf0275a44a134f970f0
+    icon: https://company-223625.frontify.com/d/JoSwaZS4Mjpj/guidelines#/basics/logos/purple-watermark
+    maintainers:
+    - email: devops@celestia.org
+      name: sysrex
+      url: celestia.org
+    - email: devops@celestia.org
+      name: Bidon15
+      url: celestia.org
+    - email: devops@celestia.org
+      name: jrmanes
+      url: celestia.org
+    - email: devops@celestia.org
+      name: smuu
+      url: celestia.org
+    name: node
+    type: application
+    urls:
+    - https://github.com/celestiaorg/celestia-helm-charts/releases/download/node-0.11.0-rc.8.1/node-0.11.0-rc.8.1.tgz
+    version: 0.11.0-rc.8.1
   - apiVersion: v2
     appVersion: 0.11.0-rc6
     created: "2023-07-04T11:56:51.3036992Z"
@@ -78,4 +125,4 @@ entries:
     urls:
     - https://github.com/celestiaorg/celestia-helm-charts/releases/download/node-0.11.0-dev.1/node-0.11.0-dev.1.tgz
     version: 0.11.0-dev.1
-generated: "2023-07-11T11:33:03.875111744Z"
+generated: "2023-09-05T08:32:01.536754839Z"
