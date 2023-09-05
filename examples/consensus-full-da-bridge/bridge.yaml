@@ -37,7 +37,7 @@ celestiaNode:
   ## There are 3 different type of nodes: bridge, light and full.
   #  note: when running a validator it's recommended to run a bridge node also
   ##
-  type: light
+  type: bridge
 
   ## Node network (caution could be different from chain-id)
   ##
@@ -49,7 +49,7 @@ celestiaNode:
     registry: ghcr.io
     repository: celestiaorg
     name: celestia-node
-    tag: v0.11.0-rc6
+    tag: 0cf4a49 # v0.11.0-rc8.1 fixed for arabica-9
     pullPolicy: IfNotPresent
 
   ## Celestia Node ports - will open them in the Statefulset and create dedicated ClusterIp service for each ones
@@ -64,7 +64,7 @@ celestiaNode:
   home:
     ## Path to node store
     ##
-    path: "/home/celestia/.celestia-light-arabica-9"
+    path: "/home/celestia/.celestia-bridge-arabica-9"
 
     ## Node store Persistent Volume configuration
     ##
@@ -81,7 +81,7 @@ celestiaNode:
     configmapName: node-config-toml
 
   ## IP address used to communicate with the celestia-app node
-  coreIp: http://consensus-validator-arabica-9.celestia-arabica.com
+  coreIp: 192.168.175.146
 
   libp2pkey:
     filename: OAZHALLLMV4Q

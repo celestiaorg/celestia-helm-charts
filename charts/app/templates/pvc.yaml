@@ -9,7 +9,19 @@ metadata:
 spec:
   accessModes:
     - {{ .Values.celestiaApp.home.volume.accessMode }}
-  storageClassName: {{ .Values.celestiaApp.home.volume.storageClass }}
   resources:
     requests:
       storage: {{ .Values.celestiaApp.home.volume.storage }}
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ tpl .Values.celestiaApp.home.configVolume.name . }}
+  namespace: {{ tpl .Values.global.namespace . }}
+spec:
+  accessModes:
+    - {{ .Values.celestiaApp.home.configVolume.accessMode }}
+  resources:
+    requests:
+      storage: {{ .Values.celestiaApp.home.configVolume.storage }}

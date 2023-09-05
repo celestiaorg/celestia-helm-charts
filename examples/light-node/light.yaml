@@ -37,7 +37,7 @@ celestiaNode:
   ## There are 3 different type of nodes: bridge, light and full.
   #  note: when running a validator it's recommended to run a bridge node also
   ##
-  type: bridge
+  type: light
 
   ## Node network (caution could be different from chain-id)
   ##
@@ -49,7 +49,7 @@ celestiaNode:
     registry: ghcr.io
     repository: celestiaorg
     name: celestia-node
-    tag: 0cf4a49  # v0.11.0-rc8.1 fixed for arabica-9
+    tag: 0cf4a49 # v0.11.0-rc8.1 fixed for arabica-9
     pullPolicy: IfNotPresent
 
   ## Celestia Node ports - will open them in the Statefulset and create dedicated ClusterIp service for each ones
@@ -64,14 +64,14 @@ celestiaNode:
   home:
     ## Path to node store
     ##
-    path: "/home/celestia/.celestia-bridge-arabica-9"
+    path: "/home/celestia/.celestia-light-arabica-9"
 
     ## Node store Persistent Volume configuration
     ##
     volume:
       name: "{{ .Values.global.name }}-{{ .Values.global.chainId }}-{{ .Values.celestiaNode.type }}-pvc-01"
       accessMode: ReadWriteOnce
-      # storageClass: standard
+      #storageClass: standard
       storage: 100Gi
 
   ## Configuration file for Celestia Node
@@ -81,7 +81,7 @@ celestiaNode:
     configmapName: node-config-toml
 
   ## IP address used to communicate with the celestia-app node
-  coreIp: 192.168.175.146
+  coreIp: http://consensus-validator-arabica-9.celestia-arabica.com
 
   libp2pkey:
     filename: OAZHALLLMV4Q
@@ -103,7 +103,7 @@ celestiaNode:
 
   ## Define resources requests and limits for single Pods.
   ##
-  resources: {}
+  resources: { }
   # requests:
   #   cpu: 200m
   #   memory: 10Gi
@@ -121,3 +121,4 @@ monitoring:
     app.kubernetes.io/name: prometheus
     app.kubernetes.io/part-of: kube-prometheus
     app: "celestia"
+
