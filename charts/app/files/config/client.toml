@@ -6,7 +6,7 @@
 ###############################################################################
 
 # The network chain ID
-chain-id = "arabica-9"
+chain-id = "mocha-4"
 # The keyring's backend, where the keys are stored (os|file|kwallet|pass|test|memory)
 keyring-backend = "test"
 # CLI output format (text|json)
