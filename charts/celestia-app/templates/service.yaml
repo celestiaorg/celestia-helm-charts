@@ -1,0 +1,190 @@
+{{- /*
+Copyright Broadcom, Inc. All Rights Reserved.
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+
+{{- if .Values.service.external.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "common.names.fullname" . }}-external
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: app
+  {{- if or .Values.service.external.annotations .Values.commonAnnotations }}
+  {{- $annotations := include "common.tplvalues.merge" (dict "values" (list .Values.service.external.annotations .Values.commonAnnotations) "context" .) }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" $annotations "context" $ ) | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.service.external.type }}
+  {{- if and .Values.service.external.clusterIP (eq .Values.service.external.type "ClusterIP") }}
+  clusterIP: {{ .Values.service.external.clusterIP }}
+  {{- end }}
+  {{- if .Values.service.external.sessionAffinity }}
+  sessionAffinity: {{ .Values.service.external.sessionAffinity }}
+  {{- end }}
+  {{- if .Values.service.external.sessionAffinityConfig }}
+  sessionAffinityConfig: {{- include "common.tplvalues.render" (dict "value" .Values.service.external.sessionAffinityConfig "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if or (eq .Values.service.external.type "LoadBalancer") (eq .Values.service.external.type "NodePort") }}
+  externalTrafficPolicy: {{ .Values.service.external.externalTrafficPolicy | quote }}
+  {{- end }}
+  {{- if and (eq .Values.service.external.type "LoadBalancer") (not (empty .Values.service.external.loadBalancerSourceRanges)) }}
+  loadBalancerSourceRanges: {{ .Values.service.external.loadBalancerSourceRanges }}
+  {{- end }}
+  {{- if and (eq .Values.service.external.type "LoadBalancer") (not (empty .Values.service.external.loadBalancerIP)) }}
+  loadBalancerIP: {{ .Values.service.external.loadBalancerIP }}
+  {{- end }}
+  ports:
+    {{- if .Values.service.external.ports.api }}
+    - name: api
+      port: {{ .Values.service.external.ports.api }}
+      {{- if not (eq .Values.service.external.ports.api .Values.app.containerPorts.api) }}
+      targetPort: {{ .Values.app.containerPorts.api }}
+      {{- end }}
+      protocol: TCP
+      {{- if and (or (eq .Values.service.external.type "NodePort") (eq .Values.service.external.type "LoadBalancer")) (not (empty .Values.service.external.nodePorts.api)) }}
+      nodePort: {{ .Values.service.external.nodePorts.api }}
+      {{- else if eq .Values.service.external.type "ClusterIP" }}
+      nodePort: null
+      {{- end }}
+    {{- end }}
+    {{- if .Values.service.external.ports.grpc }}
+    - name: grpc
+      port: {{ .Values.service.external.ports.grpc }}
+      {{- if not (eq .Values.service.external.ports.grpc .Values.app.containerPorts.grpc) }}
+      targetPort: {{ .Values.app.containerPorts.grpc }}
+      {{- end }}
+      protocol: TCP
+      {{- if and (or (eq .Values.service.external.type "NodePort") (eq .Values.service.external.type "LoadBalancer")) (not (empty .Values.service.external.nodePorts.grpc)) }}
+      nodePort: {{ .Values.service.external.nodePorts.grpc }}
+      {{- else if eq .Values.service.external.type "ClusterIP" }}
+      nodePort: null
+      {{- end }}
+    {{- end }}
+    {{- if .Values.service.external.ports.p2p }}
+    - name: p2p
+      port: {{ .Values.service.external.ports.p2p }}
+      {{- if not (eq .Values.service.external.ports.p2p .Values.app.containerPorts.p2p) }}
+      targetPort: {{ .Values.app.containerPorts.p2p }}
+      {{- end }}
+      protocol: TCP
+      {{- if and (or (eq .Values.service.external.type "NodePort") (eq .Values.service.external.type "LoadBalancer")) (not (empty .Values.service.external.nodePorts.p2p)) }}
+      nodePort: {{ .Values.service.external.nodePorts.p2p }}
+      {{- else if eq .Values.service.external.type "ClusterIP" }}
+      nodePort: null
+      {{- end }}
+    {{- end }}
+    {{- if .Values.service.external.ports.rpc }}
+    - name: rpc
+      port: {{ .Values.service.external.ports.rpc }}
+      {{- if not (eq .Values.service.external.ports.rpc .Values.app.containerPorts.rpc) }}
+      targetPort: {{ .Values.app.containerPorts.rpc }}
+      {{- end }}
+      protocol: TCP
+      {{- if and (or (eq .Values.service.external.type "NodePort") (eq .Values.service.external.type "LoadBalancer")) (not (empty .Values.service.external.nodePorts.rpc)) }}
+      nodePort: {{ .Values.service.external.nodePorts.rpc }}
+      {{- else if eq .Values.service.external.type "ClusterIP" }}
+      nodePort: null
+      {{- end }}
+    {{- end }}
+    {{- if .Values.service.external.ports.prometheus }}
+    - name: prometheus
+      port: {{ .Values.service.external.ports.prometheus }}
+      {{- if not (eq .Values.service.external.ports.prometheus .Values.app.containerPorts.prometheus) }}
+      targetPort: {{ .Values.app.containerPorts.prometheus }}
+      {{- end }}
+      protocol: TCP
+      {{- if and (or (eq .Values.service.external.type "NodePort") (eq .Values.service.external.type "LoadBalancer")) (not (empty .Values.service.external.nodePorts.prometheus)) }}
+      nodePort: {{ .Values.service.external.nodePorts.prometheus }}
+      {{- else if eq .Values.service.external.type "ClusterIP" }}
+      nodePort: null
+      {{- end }}
+    {{- end }}
+    {{- if .Values.service.external.ports.tracing }}
+    - name: tracing
+      port: {{ .Values.service.external.ports.tracing }}
+      {{- if not (eq .Values.service.external.ports.tracing .Values.app.containerPorts.tracing) }}
+      targetPort: {{ .Values.app.containerPorts.tracing }}
+      {{- end }}
+      protocol: TCP
+      {{- if and (or (eq .Values.service.external.type "NodePort") (eq .Values.service.external.type "LoadBalancer")) (not (empty .Values.service.external.nodePorts.tracing)) }}
+      nodePort: {{ .Values.service.external.nodePorts.tracing }}
+      {{- else if eq .Values.service.external.type "ClusterIP" }}
+      nodePort: null
+      {{- end }}
+    {{- end }}
+    {{- if .Values.service.external.extraPorts }}
+    {{- include "common.tplvalues.render" (dict "value" .Values.service.external.extraPorts "context" $) | nindent 4 }}
+    {{- end }}
+  {{- $podLabels := include "common.tplvalues.merge" (dict "values" (list .Values.app.podLabels .Values.commonLabels) "context" .) | fromYaml }}
+  selector: {{- include "common.labels.matchLabels" ( dict "customLabels" $podLabels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: app
+---
+{{- end }}
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "common.names.fullname" . }}-internal
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: app
+  {{- if or .Values.service.internal.annotations .Values.commonAnnotations }}
+  {{- $annotations := include "common.tplvalues.merge" (dict "values" (list .Values.service.internal.annotations .Values.commonAnnotations) "context" .) }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" $annotations "context" $ ) | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.service.internal.type }}
+  {{- if and .Values.service.internal.clusterIP (eq .Values.service.internal.type "ClusterIP") }}
+  clusterIP: {{ .Values.service.internal.clusterIP }}
+  {{- end }}
+  {{- if .Values.service.internal.sessionAffinity }}
+  sessionAffinity: {{ .Values.service.internal.sessionAffinity }}
+  {{- end }}
+  {{- if .Values.service.internal.sessionAffinityConfig }}
+  sessionAffinityConfig: {{- include "common.tplvalues.render" (dict "value" .Values.service.internal.sessionAffinityConfig "context" $) | nindent 4 }}
+  {{- end }}
+  ports:
+    - name: api
+      port: {{ .Values.service.internal.ports.api }}
+      {{- if not (eq .Values.service.internal.ports.api .Values.app.containerPorts.api) }}
+      targetPort: {{ .Values.app.containerPorts.api }}
+      {{- end }}
+      protocol: TCP
+    - name: grpc
+      port: {{ .Values.service.internal.ports.grpc }}
+      {{- if not (eq .Values.service.internal.ports.grpc .Values.app.containerPorts.grpc) }}
+      targetPort: {{ .Values.app.containerPorts.grpc }}
+      {{- end }}
+      protocol: TCP
+    - name: p2p
+      port: {{ .Values.service.internal.ports.p2p }}
+      {{- if not (eq .Values.service.internal.ports.p2p .Values.app.containerPorts.p2p) }}
+      targetPort: {{ .Values.app.containerPorts.p2p }}
+      {{- end }}
+      protocol: TCP
+    - name: rpc
+      port: {{ .Values.service.internal.ports.rpc }}
+      {{- if not (eq .Values.service.internal.ports.rpc .Values.app.containerPorts.rpc) }}
+      targetPort: {{ .Values.app.containerPorts.rpc }}
+      {{- end }}
+      protocol: TCP
+    - name: prometheus
+      port: {{ .Values.service.internal.ports.prometheus }}
+      {{- if not (eq .Values.service.internal.ports.prometheus .Values.app.containerPorts.prometheus) }}
+      targetPort: {{ .Values.app.containerPorts.prometheus }}
+      {{- end }}
+      protocol: TCP
+    - name: tracing
+      port: {{ .Values.service.internal.ports.tracing }}
+      {{- if not (eq .Values.service.internal.ports.tracing .Values.app.containerPorts.tracing) }}
+      targetPort: {{ .Values.app.containerPorts.tracing }}
+      {{- end }}
+      protocol: TCP
+    {{- if .Values.service.internal.extraPorts }}
+    {{- include "common.tplvalues.render" (dict "value" .Values.service.internal.extraPorts "context" $) | nindent 4 }}
+    {{- end }}
+  {{- $podLabels := include "common.tplvalues.merge" (dict "values" (list .Values.app.podLabels .Values.commonLabels) "context" .) | fromYaml }}
+  selector: {{- include "common.labels.matchLabels" ( dict "customLabels" $podLabels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: app

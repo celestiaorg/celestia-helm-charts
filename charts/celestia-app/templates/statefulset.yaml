@@ -1,0 +1,322 @@
+{{- /*
+Copyright Broadcom, Inc. All Rights Reserved.
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+
+apiVersion: {{ include "common.capabilities.statefulset.apiVersion" . }}
+kind: StatefulSet
+metadata:
+  name: {{ template "common.names.fullname" . }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: app
+  {{- if or .Values.app.statefulsetAnnotations .Values.commonAnnotations }}
+  {{- $annotations := include "common.tplvalues.merge" (dict "values" (list .Values.app.statefulsetAnnotations .Values.commonAnnotations) "context" .) }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" $annotations "context" $ ) | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if not .Values.app.autoscaling.enabled }}
+  replicas: {{ .Values.app.replicaCount }}
+  {{- end }}
+  podManagementPolicy: {{ .Values.app.podManagementPolicy | quote }}
+  {{- $podLabels := include "common.tplvalues.merge" (dict "values" (list .Values.app.podLabels .Values.commonLabels) "context" .) }}
+  selector:
+    matchLabels: {{- include "common.labels.matchLabels" ( dict "customLabels" $podLabels "context" $ ) | nindent 6 }}
+      app.kubernetes.io/component: app
+  serviceName: {{ template "common.names.fullname" . }}
+  {{- if .Values.app.updateStrategy }}
+  updateStrategy: {{- toYaml .Values.app.updateStrategy | nindent 4 }}
+  {{- end }}
+  template:
+    metadata:
+      {{- if .Values.app.podAnnotations }}
+      annotations: {{- include "common.tplvalues.render" (dict "value" .Values.app.podAnnotations "context" $) | nindent 8 }}
+      {{- end }}
+      labels: {{- include "common.labels.standard" ( dict "customLabels" $podLabels "context" $ ) | nindent 8 }}
+        app.kubernetes.io/component: app
+    spec:
+      {{- include "app.imagePullSecrets" . | nindent 6 }}
+      serviceAccountName: {{ template "app.serviceAccountName" . }}
+      automountServiceAccountToken: {{ .Values.app.automountServiceAccountToken }}
+      {{- if .Values.app.hostAliases }}
+      hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.app.hostAliases "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.app.affinity }}
+      affinity: {{- include "common.tplvalues.render" ( dict "value" .Values.app.affinity "context" $) | nindent 8 }}
+      {{- else }}
+      affinity:
+        podAffinity: {{- include "common.affinities.pods" (dict "type" .Values.app.podAffinityPreset "component" "app" "customLabels" $podLabels "context" $) | nindent 10 }}
+        podAntiAffinity: {{- include "common.affinities.pods" (dict "type" .Values.app.podAntiAffinityPreset "component" "app" "customLabels" $podLabels "context" $) | nindent 10 }}
+        nodeAffinity: {{- include "common.affinities.nodes" (dict "type" .Values.app.nodeAffinityPreset.type "key" .Values.app.nodeAffinityPreset.key "values" .Values.app.nodeAffinityPreset.values) | nindent 10 }}
+      {{- end }}
+      {{- if .Values.app.nodeSelector }}
+      nodeSelector: {{- include "common.tplvalues.render" ( dict "value" .Values.app.nodeSelector "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.app.tolerations }}
+      tolerations: {{- include "common.tplvalues.render" (dict "value" .Values.app.tolerations "context" .) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.app.priorityClassName }}
+      priorityClassName: {{ .Values.app.priorityClassName | quote }}
+      {{- end }}
+      {{- if .Values.app.schedulerName }}
+      schedulerName: {{ .Values.app.schedulerName | quote }}
+      {{- end }}
+      {{- if .Values.app.topologySpreadConstraints }}
+      topologySpreadConstraints: {{- include "common.tplvalues.render" (dict "value" .Values.app.topologySpreadConstraints "context" .) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.app.podSecurityContext.enabled }}
+      securityContext: {{- omit .Values.app.podSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- end }}
+      {{- if .Values.app.terminationGracePeriodSeconds }}
+      terminationGracePeriodSeconds: {{ .Values.app.terminationGracePeriodSeconds }}
+      {{- end }}
+      initContainers:
+        {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
+        - name: volume-permissions
+          image: {{ include "app.volumePermissions.image" . }}
+          imagePullPolicy: {{ .Values.volumePermissions.image.pullPolicy | quote }}
+          command:
+            - %%command%%
+          {{- if .Values.volumePermissions.containerSecurityContext.enabled }}
+          securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.volumePermissions.containerSecurityContext "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.volumePermissions.resources }}
+          resources: {{- toYaml .Values.volumePermissions.resources | nindent 12 }}
+          {{- else if ne .Values.volumePermissions.resourcesPreset "none" }}
+          resources: {{- include "common.resources.preset" (dict "type" .Values.volumePermissions.resourcesPreset) | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: data
+              mountPath: {{ .Values.app.home }}/data
+              {{- if .Values.persistence.subPath }}
+              subPath: {{ .Values.persistence.subPath }}
+              {{- end }}
+        {{- end }}
+        - name: create-priv-validator-state
+          image: busybox
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: CELESTIA_HOME
+              value: {{ .Values.app.home }}
+          command:
+            - sh
+            - -c
+            - |
+              if [[ ! -f ${CELESTIA_HOME}/data/priv_validator_state.json ]]
+              then
+                  mkdir -p ${CELESTIA_HOME}/data
+                  cat <<EOF > ${CELESTIA_HOME}/data/priv_validator_state.json
+              {
+                "height": "0",
+                "round": 0,
+                "step": 0
+              }
+              EOF
+              fi
+          volumeMounts:
+            - name: data
+              mountPath: {{ .Values.app.home }}/data
+        - name: download-genesis
+          image: busybox
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+            - |
+              mkdir -p /genesis
+              wget -O /genesis/genesis.json {{ .Values.app.genesisURL }}
+              if ! command -v jq &> /dev/null; then
+                echo "jq not found, installing..."
+                wget -O /bin/jq https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64
+                chmod +x /bin/jq
+              fi
+              if jq -e '.result.genesis' /genesis/genesis.json > /dev/null; then
+                jq '.result.genesis' /genesis/genesis.json > /genesis/genesis.json.tmp
+                mv /genesis/genesis.json.tmp /genesis/genesis.json
+              fi
+          volumeMounts:
+            - name: genesis
+              mountPath: /genesis
+        {{- if .Values.app.initContainers }}
+          {{- include "common.tplvalues.render" (dict "value" .Values.app.initContainers "context" $) | nindent 8 }}
+        {{- end }}
+      containers:
+        - name: app
+          image: {{ template "app.image" . }}
+          imagePullPolicy: {{ .Values.app.image.pullPolicy }}
+          {{- if .Values.app.containerSecurityContext.enabled }}
+          securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.app.containerSecurityContext "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.diagnosticMode.enabled }}
+          command: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.command "context" $) | nindent 12 }}
+          {{- else if .Values.app.command }}
+          command: {{- include "common.tplvalues.render" (dict "value" .Values.app.command "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.diagnosticMode.enabled }}
+          args: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.args "context" $) | nindent 12 }}
+          {{- else if .Values.app.args }}
+          args: {{- include "common.tplvalues.render" (dict "value" .Values.app.args "context" $) | nindent 12 }}
+          {{- end }}
+          env:
+            - name: BITNAMI_DEBUG
+              value: {{ ternary "true" "false" (or .Values.app.image.debug .Values.diagnosticMode.enabled) | quote }}
+            - name: CELESTIA_HOME
+              value: {{ .Values.app.home }}
+            {{- if .Values.app.extraEnvVars }}
+            {{- include "common.tplvalues.render" (dict "value" .Values.app.extraEnvVars "context" $) | nindent 12 }}
+            {{- end }}
+          envFrom:
+            {{- if .Values.app.extraEnvVarsCM }}
+            - configMapRef:
+                name: {{ include "common.tplvalues.render" (dict "value" .Values.app.extraEnvVarsCM "context" $) }}
+            {{- end }}
+            {{- if .Values.app.extraEnvVarsSecret }}
+            - secretRef:
+                name: {{ include "common.tplvalues.render" (dict "value" .Values.app.extraEnvVarsSecret "context" $) }}
+            {{- end }}
+          {{- if .Values.app.resources }}
+          resources: {{- toYaml .Values.app.resources | nindent 12 }}
+          {{- else if ne .Values.app.resourcesPreset "none" }}
+          resources: {{- include "common.resources.preset" (dict "type" .Values.app.resourcesPreset) | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: api
+              containerPort: {{ .Values.app.containerPorts.api }}
+            - name: grpc
+              containerPort: {{ .Values.app.containerPorts.grpc }}
+            - name: p2p
+              containerPort: {{ .Values.app.containerPorts.p2p }}
+            - name: rpc
+              containerPort: {{ .Values.app.containerPorts.rpc }}
+            - name: prometheus
+              containerPort: {{ .Values.app.containerPorts.prometheus }}
+            - name: tracing
+              containerPort: {{ .Values.app.containerPorts.tracing }}
+          {{- if not .Values.diagnosticMode.enabled }}
+          {{- if .Values.app.customLivenessProbe }}
+          livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.app.customLivenessProbe "context" $) | nindent 12 }}
+          {{- else if .Values.app.livenessProbe.enabled }}
+          livenessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.app.livenessProbe "enabled") "context" $) | nindent 12 }}
+            tcpSocket:
+              port: rpc
+          {{- end }}
+          {{- if .Values.app.customReadinessProbe }}
+          readinessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.app.customReadinessProbe "context" $) | nindent 12 }}
+          {{- else if .Values.app.readinessProbe.enabled }}
+          readinessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.app.readinessProbe "enabled") "context" $) | nindent 12 }}
+            exec:
+              command:
+                - sh
+                - '-c'
+                - >
+                  response=$(wget --timeout=1 -qO- --header="Accept:
+                  application/json" "http://localhost:26657/status"); if [ "$?" -eq
+                  0 ] && echo "$response" | grep -q '"catching_up":false'; then
+                      echo "Not Catching up";
+                      exit 0;
+                  else
+                      echo "Catching up";
+                      exit 1;
+                  fi
+          {{- end }}
+          {{- if .Values.app.customStartupProbe }}
+          startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.app.customStartupProbe "context" $) | nindent 12 }}
+          {{- else if .Values.app.startupProbe.enabled }}
+          startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.app.startupProbe "enabled") "context" $) | nindent 12 }}
+            tcpSocket:
+              port: rpc
+          {{- end }}
+          {{- end }}
+          {{- if .Values.app.lifecycleHooks }}
+          lifecycle: {{- include "common.tplvalues.render" (dict "value" .Values.app.lifecycleHooks "context" $) | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: data
+              mountPath: {{ .Values.app.home }}/data
+              {{- if .Values.persistence.subPath }}
+              subPath: {{ .Values.persistence.subPath }}
+              {{- end }}
+              readOnly: false
+            - name: empty-dir
+              mountPath: /tmp
+              subPath: tmp-dir
+            - name: node-key
+              mountPath: /home/celestia/config/node_key.json
+              subPath: node_key.json
+            - name: validator-key
+              mountPath: /home/celestia/config/priv_validator_key.json
+              subPath: priv_validator_key.json
+            - name: genesis
+              mountPath: /home/celestia/config/genesis.json
+              subPath: genesis.json
+            - name: config-dir
+              mountPath: /home/celestia/config
+            - name: config
+              mountPath: /home/celestia/config/config.toml
+              subPath: config.toml
+            - name: config
+              mountPath: /home/celestia/config/app.toml
+              subPath: app.toml
+            - name: config
+              mountPath: /home/celestia/config/client.toml
+              subPath: client.toml
+          {{- if .Values.app.extraVolumeMounts }}
+          {{- include "common.tplvalues.render" (dict "value" .Values.app.extraVolumeMounts "context" $) | nindent 12 }}
+          {{- end }}
+        {{- if .Values.app.sidecars }}
+        {{- include "common.tplvalues.render" ( dict "value" .Values.app.sidecars "context" $) | nindent 8 }}
+        {{- end }}
+      volumes:
+        - name: empty-dir
+          emptyDir: {}
+        - name: node-key
+          secret:
+            secretName: {{ .Values.app.secret.name }}
+            items:
+              - key: node_key_json
+                path: node_key.json
+            defaultMode: 384
+        - name: validator-key
+          secret:
+            secretName: {{ .Values.app.secret.name }}
+            items:
+              - key: priv_validator_key_json
+                path: priv_validator_key.json
+            defaultMode: 384
+        - name: genesis
+          emptyDir: {}
+        - name: config-dir
+          emptyDir: {}
+        - name: config
+          configMap:
+            name: {{ template "common.names.fullname" . }}
+        {{- if .Values.app.extraVolumes }}
+        {{- include "common.tplvalues.render" (dict "value" .Values.app.extraVolumes "context" $) | nindent 8 }}
+        {{- end }}
+  {{- if .Values.persistence.enabled }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+        {{- if or .Values.persistence.annotations .Values.commonAnnotations }}
+        {{- $claimAnnotations := include "common.tplvalues.merge" (dict "values" .Values.persistence.annotations .Values.commonAnnotations "context" .) | fromYaml }}
+        annotations: {{- include "common.tplvalues.render" ( dict "value" $claimAnnotations "context" $ ) | nindent 10 }}
+        {{- end }}
+        {{- if .Values.commonLabels }}
+        labels: {{- include "common.labels.matchLabels" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 10 }}
+        {{- end }}
+      spec:
+        accessModes:
+        {{- range .Values.persistence.accessModes }}
+          - {{ . | quote }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.persistence.size | quote }}
+        {{- if .Values.persistence.selector }}
+        selector: {{- include "common.tplvalues.render" (dict "value" .Values.persistence.selector "context" $) | nindent 4 }}
+        {{- end }}
+        {{- if .Values.persistence.dataSource }}
+        dataSource: {{- include "common.tplvalues.render" (dict "value" .Values.persistence.dataSource "context" $) | nindent 4 }}
+        {{- end }}
+        {{- include "common.storage.class" (dict "persistence" .Values.persistence "global" .Values.global) | nindent 2 }}
+  {{- end }}

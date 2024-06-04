@@ -1,0 +1,23 @@
+persistence:
+  size: 30Gi
+  # dataSource:
+  #   apiGroup: snapshot.storage.k8s.io
+  #   kind: VolumeSnapshot
+  #   name: consensus-latest
+app:
+  secret:
+    name: consensus-1
+  resources:
+    requests:
+      cpu: 2
+      memory: 8Gi
+    limits:
+      cpu: 2
+      memory: 8Gi
+  genesisURL: "http://10.44.143.2:26657/genesis"
+  config:
+    configtoml:
+      p2p:
+        persistent_peers: "7aaed043cf5498032d4e7d0f146bc15f02bb476d@10.44.143.2:26656"
+diagnosticMode:
+  enabled: false

@@ -1,0 +1,1022 @@
+# Copyright Broadcom, Inc. All Rights Reserved.
+# SPDX-License-Identifier: APACHE-2.0
+
+## @section Global parameters
+## Global Docker image parameters
+## Please, note that this will override the image parameters, including dependencies, configured to use the global value
+## Current available global Docker image parameters: imageRegistry, imagePullSecrets and storageClass
+##
+
+## @param global.imageRegistry Global Docker image registry
+## @param global.imagePullSecrets Global Docker registry secret names as an array
+## @param global.storageClass Global StorageClass for Persistent Volume(s)
+##
+global:
+  imageRegistry: ""
+  ## e.g:
+  ## imagePullSecrets:
+  ##   - myRegistryKeySecretName
+  ##
+  imagePullSecrets: []
+  storageClass: ""
+  ## Compatibility adaptations for Kubernetes platforms
+  ##
+  compatibility:
+    ## Compatibility adaptations for Openshift
+    ##
+    openshift:
+      ## @param global.compatibility.openshift.adaptSecurityContext Adapt the securityContext sections of the deployment to make them compatible with Openshift restricted-v2 SCC: remove runAsUser, runAsGroup and fsGroup and let the platform use their allowed default IDs. Possible values: auto (apply if the detected running cluster is Openshift), force (perform the adaptation always), disabled (do not perform adaptation)
+      ##
+      adaptSecurityContext: auto
+
+## @section Common parameters
+##
+
+## @param kubeVersion Override Kubernetes version
+##
+kubeVersion: ""
+## @param nameOverride String to partially override common.names.name
+##
+nameOverride: ""
+## @param fullnameOverride String to fully override common.names.fullname
+##
+fullnameOverride: ""
+## @param namespaceOverride String to fully override common.names.namespace
+##
+namespaceOverride: ""
+## @param commonLabels Labels to add to all deployed objects
+##
+commonLabels: {}
+## @param commonAnnotations Annotations to add to all deployed objects
+##
+commonAnnotations: {}
+## @param clusterDomain Kubernetes cluster domain name
+##
+clusterDomain: cluster.local
+## @param extraDeploy Array of extra objects to deploy with the release
+##
+extraDeploy: []
+## Diagnostic mode
+## @param diagnosticMode.enabled Enable diagnostic mode (all probes will be disabled and the command will be overridden)
+## @param diagnosticMode.command Command to override all containers in the chart release
+## @param diagnosticMode.args Args to override all containers in the chart release
+##
+diagnosticMode:
+  enabled: false
+  command:
+    - sleep
+  args:
+    - infinity
+
+## @section celestia-app Parameters
+##
+
+## %%MAIN_CONTAINER/POD_DESCRIPTION%%
+##
+app:
+  ## Celestia celestia-app image
+  ## ref: https://github.com/celestiaorg/celestia-app/pkgs/container/celestia-app/versions?filters%5Bversion_type%5D=tagged
+  ## @param app.image.registry [default: REGISTRY_NAME] celestia-app image registry
+  ## @param app.image.repository [default: REPOSITORY_NAME/celestia-app] celestia-app image repository
+  ## @skip app.image.tag celestia-app image tag (immutable tags are recommended)
+  ## @param app.image.digest celestia-app image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
+  ## @param app.image.pullPolicy celestia-app image pull policy
+  ## @param app.image.pullSecrets celestia-app image pull secrets
+  ## @param app.image.debug Enable celestia-app image debug mode
+  ##
+  image:
+    registry: ghcr.io
+    repository: celestiaorg/celestia-app
+    tag: v1.9.0
+    digest: ""
+    ## Specify a imagePullPolicy
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    ## ref: https://kubernetes.io/docs/concepts/containers/images/#pre-pulled-images
+    ##
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+    debug: false
+  ## @param app.replicaCount Number of app replicas to deploy
+  ##
+  replicaCount: 1
+  ## @param app.containerPorts.api app API container port
+  ## @param app.containerPorts.grpc app gRPC container port
+  ## @param app.containerPorts.p2p app P2P container port
+  ## @param app.containerPorts.rpc app RPC container port
+  ## @param app.containerPorts.prometheus app Prometheus container port
+  ## @param app.containerPorts.tracing app Tracing container port
+  ##
+  containerPorts:
+    api: 1317
+    grpc: 9090
+    p2p: 26656
+    rpc: 26657
+    prometheus: 26660
+    tracing: 26661
+  ## Configure extra options for app containers' liveness and readiness probes
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
+  ## @param app.livenessProbe.enabled Enable livenessProbe on app containers
+  ## @param app.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
+  ## @param app.livenessProbe.periodSeconds Period seconds for livenessProbe
+  ## @param app.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
+  ## @param app.livenessProbe.failureThreshold Failure threshold for livenessProbe
+  ## @param app.livenessProbe.successThreshold Success threshold for livenessProbe
+  ##
+  livenessProbe:
+    enabled: false
+    initialDelaySeconds: 0
+    periodSeconds: 10
+    timeoutSeconds: 1
+    failureThreshold: 3
+    successThreshold: 1
+  ## @param app.readinessProbe.enabled Enable readinessProbe on app containers
+  ## @param app.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
+  ## @param app.readinessProbe.periodSeconds Period seconds for readinessProbe
+  ## @param app.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
+  ## @param app.readinessProbe.failureThreshold Failure threshold for readinessProbe
+  ## @param app.readinessProbe.successThreshold Success threshold for readinessProbe
+  ##
+  readinessProbe:
+    enabled: false
+    initialDelaySeconds: 0
+    periodSeconds: 10
+    timeoutSeconds: 1
+    failureThreshold: 3
+    successThreshold: 1
+  ## @param app.startupProbe.enabled Enable startupProbe on app containers
+  ## @param app.startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
+  ## @param app.startupProbe.periodSeconds Period seconds for startupProbe
+  ## @param app.startupProbe.timeoutSeconds Timeout seconds for startupProbe
+  ## @param app.startupProbe.failureThreshold Failure threshold for startupProbe
+  ## @param app.startupProbe.successThreshold Success threshold for startupProbe
+  ##
+  startupProbe:
+    enabled: false
+    initialDelaySeconds: 0
+    periodSeconds: 10
+    timeoutSeconds: 1
+    failureThreshold: 3
+    successThreshold: 1
+  ## @param app.customLivenessProbe Custom livenessProbe that overrides the default one
+  ##
+  customLivenessProbe: {}
+  ## @param app.customReadinessProbe Custom readinessProbe that overrides the default one
+  ##
+  customReadinessProbe: {}
+  ## @param app.customStartupProbe Custom startupProbe that overrides the default one
+  ##
+  customStartupProbe: {}
+  ## app resource requests and limits
+  ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  ## @param app.resourcesPreset Set app container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if app.resources is set (app.resources is recommended for production).
+  ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+  ##
+  resourcesPreset: "nano"
+  ## @param app.resources Set app container requests and limits for different resources like CPU or memory (essential for production workloads)
+  ## Example:
+  ## resources:
+  ##   requests:
+  ##     cpu: 2
+  ##     memory: 512Mi
+  ##   limits:
+  ##     cpu: 3
+  ##     memory: 1024Mi
+  ##
+  resources:
+    requests:
+      cpu: 2
+      memory: 8Gi
+    limits:
+      cpu: 2
+      memory: 8Gi
+  ## Configure Pods Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param app.podSecurityContext.enabled Enable app pods' Security Context
+  ## @param app.podSecurityContext.fsGroupChangePolicy Set filesystem group change policy for app pods
+  ## @param app.podSecurityContext.sysctls Set kernel settings using the sysctl interface for app pods
+  ## @param app.podSecurityContext.supplementalGroups Set filesystem extra groups for app pods
+  ## @param app.podSecurityContext.fsGroup Set fsGroup in app pods' Security Context
+  ##
+  podSecurityContext:
+    enabled: true
+    fsGroupChangePolicy: Always
+    sysctls: []
+    supplementalGroups: []
+    fsGroup: 10001
+  ## Configure Container Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  ## @param app.containerSecurityContext.enabled Enabled app container' Security Context
+  ## @param app.containerSecurityContext.seLinuxOptions [object,nullable] Set SELinux options in app container
+  ## @param app.containerSecurityContext.runAsUser Set runAsUser in app container' Security Context
+  ## @param app.containerSecurityContext.runAsNonRoot Set runAsNonRoot in app container' Security Context
+  ## @param app.containerSecurityContext.readOnlyRootFilesystem Set readOnlyRootFilesystem in app container' Security Context
+  ## @param app.containerSecurityContext.privileged Set privileged in app container' Security Context
+  ## @param app.containerSecurityContext.allowPrivilegeEscalation Set allowPrivilegeEscalation in app container' Security Context
+  ## @param app.containerSecurityContext.capabilities.drop List of capabilities to be dropped in app container
+  ## @param app.containerSecurityContext.seccompProfile.type Set seccomp profile in app container
+  ##
+  containerSecurityContext:
+    enabled: true
+    seLinuxOptions: {}
+    runAsUser: 10001
+    runAsGroup: 10001
+    runAsNonRoot: true
+    readOnlyRootFilesystem: true
+    privileged: false
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop: ["ALL"]
+    seccompProfile:
+      type: "RuntimeDefault"
+
+  home: "/home/celestia"
+  genesisURL: "SET_IT"
+
+  ## A secret must be available in the cluster with the following format:
+  ## - name: <secret-name>
+  ## - items:
+  ##     - key: node_key_json
+  ##       path: node_key.json
+  ##     - key: priv_validator_key_json
+  ##       path: priv_validator_key.json
+  secret:
+    name: SET_IT
+
+  config:
+    apptoml:
+      minimum_gas_prices: 0.002utia
+      pruning: default
+      pruning_keep_recent: "0"
+      pruning_interval: "0"
+      halt_height: 0
+      halt_time: 0
+      min_retain_blocks: 0
+      inter_block_cache: true
+      index_events: []
+      iavl_cache_size: 781250
+      iavl_disable_fastnode: false
+      iavl_lazy_loading: false
+      app_db_backend: ""
+      telemetry:
+        service_name: ""
+        enabled: false
+        enable_hostname: false
+        enable_hostname_label: false
+        enable_service_label: false
+        prometheus_retention_time: 0
+        global_labels: []
+      api:
+        enable: false
+        swagger: false
+        address: tcp://0.0.0.0:1317
+        max_open_connections: 1000
+        rpc_read_timeout: 10
+        rpc_write_timeout: 0
+        rpc_max_body_bytes: 1000000
+        enabled_unsafe_cors: false
+      rosetta:
+        enable: false
+        address: :8080
+        blockchain: app
+        network: network
+        retries: 3
+        offline: false
+        enable_fee_suggestion: false
+        gas_to_suggest: 210000
+        denom_to_suggest: uatom
+      grpc:
+        enable: false
+        address: 0.0.0.0:9090
+        max_recv_msg_size: "10485760"
+        max_send_msg_size: "2147483647"
+      grpc_web:
+        enable: false
+        address: 0.0.0.0:9091
+        enable_unsafe_cors: false
+      state_sync:
+        snapshot_interval: 1500
+        snapshot_keep_recent: 2
+      store:
+        streamers: []
+      streamers:
+        file:
+          keys:
+            - '*'
+          write_dir: ""
+          prefix: ""
+          output_metadata: "true"
+          stop_node_on_error: "true"
+          fsync: "false"
+    clienttoml:
+      chain_id: celestia
+      keyring_backend: test
+      output: text
+      node: tcp://localhost:26657
+      broadcast_mode: sync
+    configtoml:
+      proxy_app: tcp://127.0.0.1:26658
+      moniker: app
+      fast_sync: true
+      db_backend: goleveldb
+      db_dir: data
+      log_level: info
+      log_format: plain
+      genesis_file: config/genesis.json
+      priv_validator_key_file: config/priv_validator_key.json
+      priv_validator_state_file: data/priv_validator_state.json
+      priv_validator_laddr: ""
+      node_key_file: config/node_key.json
+      abci: socket
+      filter_peers: false
+      rpc:
+        laddr: tcp://127.0.0.1:26657
+        cors_allowed_origins: []
+        cors_allowed_methods:
+          - HEAD
+          - GET
+          - POST
+        cors_allowed_headers:
+          - Origin
+          - Accept
+          - Content-Type
+          - X-Requested-With
+          - X-Server-Time
+        grpc_laddr: ""
+        grpc_max_open_connections: 900
+        unsafe: false
+        max_open_connections: 900
+        max_subscription_clients: 100
+        max_subscriptions_per_client: 5
+        experimental_subscription_buffer_size: 200
+        experimental_websocket_write_buffer_size: 200
+        experimental_close_on_slow_client: false
+        timeout_broadcast_tx_commit: 50s
+        max_body_bytes: 8388608
+        max_header_bytes: 1048576
+        tls_cert_file: ""
+        tls_key_file: ""
+        pprof_laddr: localhost:6060
+      p2p:
+        laddr: tcp://0.0.0.0:26656
+        external_address: ""
+        seeds: ""
+        persistent_peers: ""
+        upnp: false
+        addr_book_file: config/addrbook.json
+        addr_book_strict: true
+        max_num_inbound_peers: 40
+        max_num_outbound_peers: 10
+        unconditional_peer_ids: ""
+        persistent_peers_max_dial_period: 0s
+        flush_throttle_timeout: 100ms
+        max_packet_msg_payload_size: 1024
+        send_rate: 5120000
+        recv_rate: 5120000
+        pex: true
+        seed_mode: false
+        private_peer_ids: ""
+        allow_duplicate_ip: false
+        handshake_timeout: 20s
+        dial_timeout: 3s
+      mempool:
+        version: v1
+        recheck: true
+        broadcast: true
+        wal_dir: ""
+        size: 5000
+        max_txs_bytes: 39485440
+        cache_size: 10000
+        keep_invalid_txs_in_cache: false
+        max_tx_bytes: 7897088
+        max_batch_bytes: 0
+        ttl_duration: 1m15s
+        ttl_num_blocks: 5
+        max_gossip_delay: 0s
+      statesync:
+        enable: false
+        rpc_servers: ""
+        trust_height: 0
+        trust_hash: ""
+        trust_period: 168h0m0s
+        discovery_time: 15s
+        temp_dir: ""
+        chunk_request_timeout: 10s
+        chunk_fetchers: "4"
+      fastsync:
+        version: v0
+      consensus:
+        wal_file: data/cs.wal/wal
+        timeout_propose: 10s
+        timeout_propose_delta: 500ms
+        timeout_prevote: 1s
+        timeout_prevote_delta: 500ms
+        timeout_precommit: 1s
+        timeout_precommit_delta: 500ms
+        timeout_commit: 11s
+        double_sign_check_height: 0
+        skip_timeout_commit: false
+        create_empty_blocks: true
+        create_empty_blocks_interval: 0s
+        peer_gossip_sleep_duration: 100ms
+        peer_query_maj23_sleep_duration: 2s
+      storage:
+        discard_abci_responses: true
+      tx_index:
+        indexer: "null"
+        psql_conn: ""
+      instrumentation:
+        prometheus: false
+        prometheus_listen_addr: :26660
+        max_open_connections: 3
+        namespace: cometbft
+        influx_url: ""
+        influx_token: ""
+        influx_bucket: e2e
+        influx_org: celestia
+        influx_batch_size: 20
+        influx_tables:
+          - mempool_tx
+          - mempool_peer_state
+          - mempool_rejected
+          - consensus_round_state
+          - consensus_block_parts
+          - consensus_block
+          - consensus_vote
+        pyroscope_url: ""
+        pyroscope_trace: false
+        pyroscope_profile_types:
+          - cpu
+          - alloc_objects
+          - inuse_objects
+          - goroutines
+          - mutex_count
+          - mutex_duration
+          - block_count
+          - block_duration
+
+  ## @param app.existingConfigmap The name of an existing ConfigMap with your custom configuration for app
+  ##
+  existingConfigmap:
+  ## @param app.command Override default app container command (useful when using custom images)
+  ##
+  command:
+    - celestia-appd
+    - start
+    - --home
+    - $(CELESTIA_HOME)
+  ## @param app.args Override default app container args (useful when using custom images)
+  ##
+  args: []
+  ## @param app.automountServiceAccountToken Mount Service Account token in app pods
+  ##
+  automountServiceAccountToken: false
+  ## @param app.hostAliases app pods host aliases
+  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+  ##
+  hostAliases: []
+  ## @param app.daemonsetAnnotations Annotations for app daemonset
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  daemonsetAnnotations: {}
+  ## @param app.deploymentAnnotations Annotations for app deployment
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  deploymentAnnotations: {}
+  ## @param app.statefulsetAnnotations Annotations for app statefulset
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  statefulsetAnnotations: {}
+  ## @param app.podLabels Extra labels for app pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  ##
+  podLabels: {}
+  ## @param app.podAnnotations Annotations for app pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  podAnnotations: {}
+  ## @param app.podAffinityPreset Pod affinity preset. Ignored if `app.affinity` is set. Allowed values: `soft` or `hard`
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+  ##
+  podAffinityPreset: ""
+  ## @param app.podAntiAffinityPreset Pod anti-affinity preset. Ignored if `app.affinity` is set. Allowed values: `soft` or `hard`
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+  ##
+  podAntiAffinityPreset: soft
+  ## Node app.affinity preset
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
+  ##
+  nodeAffinityPreset:
+    ## @param app.nodeAffinityPreset.type Node affinity preset type. Ignored if `app.affinity` is set. Allowed values: `soft` or `hard`
+    ##
+    type: ""
+    ## @param app.nodeAffinityPreset.key Node label key to match. Ignored if `app.affinity` is set
+    ##
+    key: ""
+    ## @param app.nodeAffinityPreset.values Node label values to match. Ignored if `app.affinity` is set
+    ## E.g.
+    ## values:
+    ##   - e2e-az1
+    ##   - e2e-az2
+    ##
+    values: []
+  ## @param app.affinity Affinity for app pods assignment
+  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+  ## NOTE: `app.podAffinityPreset`, `app.podAntiAffinityPreset`, and `app.nodeAffinityPreset` will be ignored when it's set
+  ##
+  affinity: {}
+  ## @param app.nodeSelector Node labels for app pods assignment
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
+  ##
+  nodeSelector: {}
+  ## @param app.tolerations Tolerations for app pods assignment
+  ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+  ##
+  tolerations: []
+  ## ONLY FOR DEPLOYMENTS:
+  ## @param app.updateStrategy.type app deployment strategy type
+  ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+  ## ONLY FOR STATEFULSETS:
+  ## @param app.updateStrategy.type app statefulset strategy type
+  ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#update-strategies
+  ##
+  updateStrategy:
+    ## ONLY FOR DEPLOYMENTS:
+    ## Can be set to RollingUpdate or Recreate
+    ## ONLY FOR STATEFULSETS:
+    ## Can be set to RollingUpdate or OnDelete
+    ##
+    type: RollingUpdate
+  ## ONLY FOR STATEFULSETS:
+  ## @param app.podManagementPolicy Pod management policy for app statefulset
+  ## Ref: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#pod-management-policies
+  ##
+  podManagementPolicy: OrderedReady
+  ## @param app.priorityClassName app pods' priorityClassName
+  ##
+  priorityClassName: ""
+  ## @param app.topologySpreadConstraints Topology Spread Constraints for app pod assignment spread across your cluster among failure-domains
+  ## Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/#spread-constraints-for-pods
+  ##
+  topologySpreadConstraints: []
+  ## @param app.schedulerName Name of the k8s scheduler (other than default) for app pods
+  ## ref: https://kubernetes.io/docs/tasks/administer-cluster/configure-multiple-schedulers/
+  ##
+  schedulerName: ""
+  ## @param app.terminationGracePeriodSeconds Seconds app pods need to terminate gracefully
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/pod/#termination-of-pods
+  ##
+  terminationGracePeriodSeconds: ""
+  ## @param app.lifecycleHooks for app containers to automate configuration before or after startup
+  ##
+  lifecycleHooks: {}
+  ## @param app.extraEnvVars Array with extra environment variables to add to app containers
+  ## e.g:
+  ## extraEnvVars:
+  ##   - name: FOO
+  ##     value: "bar"
+  ##
+  extraEnvVars: []
+  ## @param app.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for app containers
+  ##
+  extraEnvVarsCM: ""
+  ## @param app.extraEnvVarsSecret Name of existing Secret containing extra env vars for app containers
+  ##
+  extraEnvVarsSecret: ""
+  ## @param app.extraVolumes Optionally specify extra list of additional volumes for the app pods
+  ##
+  extraVolumes: []
+  ## @param app.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the app containers
+  ##
+  extraVolumeMounts: []
+  ## @param app.sidecars Add additional sidecar containers to the app pods
+  ## e.g:
+  ## sidecars:
+  ##   - name: your-image-name
+  ##     image: your-image
+  ##     imagePullPolicy: Always
+  ##     ports:
+  ##       - name: portname
+  ##         containerPort: 1234
+  ##
+  sidecars: []
+  ## @param app.initContainers Add additional init containers to the app pods
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+  initContainers: []
+  ## Pod Disruption Budget configuration
+  ## ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb
+  ## @param app.pdb.create Enable/disable a Pod Disruption Budget creation
+  ## @param app.pdb.minAvailable Minimum number/percentage of pods that should remain scheduled
+  ## @param app.pdb.maxUnavailable Maximum number/percentage of pods that may be made unavailable
+  ##
+  pdb:
+    create: false
+    minAvailable: 1
+    maxUnavailable: ""
+  ## Autoscaling configuration
+  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+  ## @param app.autoscaling.enabled Enable autoscaling for app
+  ## @param app.autoscaling.minReplicas Minimum number of app replicas
+  ## @param app.autoscaling.maxReplicas Maximum number of app replicas
+  ## @param app.autoscaling.targetCPU Target CPU utilization percentage
+  ## @param app.autoscaling.targetMemory Target Memory utilization percentage
+  ##
+  autoscaling:
+    enabled: false
+    minReplicas: ""
+    maxReplicas: ""
+    targetCPU: ""
+    targetMemory: ""
+
+  # TODO: Remove when not needed in the end
+  # TODO: If you add here something remember to add it to:_helpers.tpl (define "app.imagePullSecrets") and NOTES.txt ({{- include "common.warnings.rollingTag" .Values.%%OTHER_OBJECT_BLOCK%%.image }})
+# ## %%SECONDARY_CONTAINER/POD_DESCRIPTION%%
+# ##
+# %%SECONDARY_OBJECT_BLOCK%%:
+#   %%SAME_STRUCTURE_AS_THE_MAIN_CONTAINER/POD%%
+
+# ## %%OTHERS_CONTAINER/POD_DESCRIPTION%%
+# ##
+# %%OTHER_OBJECT_BLOCK%%:
+#   %%SAME_STRUCTURE_AS_THE_MAIN_CONTAINER/POD%%
+
+## @section Traffic Exposure Parameters
+##
+
+## app service parameters
+##
+service:
+  ## @param service.internal.type app internal service type
+  ##
+  internal:
+    type: ClusterIP
+    ## @param service.internal.ports.api app internal service API port
+    ## @param service.internal.ports.grpc app internal service gRPC port
+    ## @param service.internal.ports.p2p app internal service P2P port
+    ## @param service.internal.ports.rpc app internal service RPC port
+    ## @param service.internal.ports.prometheus app internal service Prometheus port
+    ## @param service.internal.ports.tracing app internal service Tracing port
+    ports:
+      api: 1317
+      grpc: 9090
+      p2p: 26656
+      rpc: 26657
+      prometheus: 26660
+      tracing: 26661
+    ## @param service.internal.clusterIP app internal service Cluster IP
+    ## e.g.:
+    ## clusterIP: None
+    ##
+    clusterIP: ""
+    ## @param service.internal.annotations Additional custom annotations for app internal service
+    ##
+    annotations: {}
+    ## @param service.internal.sessionAffinity Control where client requests go, to the same pod or round-robin
+    ## Values: ClientIP or None
+    ## ref: https://kubernetes.io/docs/concepts/services-networking/service/
+    ##
+    sessionAffinity: None
+    ## @param service.internal.sessionAffinityConfig Additional settings for the sessionAffinity
+    ## sessionAffinityConfig:
+    ##   clientIP:
+    ##     timeoutSeconds: 300
+    ##
+    sessionAffinityConfig: {}
+
+  ## @param service.external.enabled Enable external service
+  ##
+  external:
+    enabled: true
+    ## @param service.external.type app external service type
+    ##
+    type: LoadBalancer
+    ## @param service.external.ports.api app external service API port
+    ## @param service.external.ports.grpc app external service gRPC port
+    ## @param service.external.ports.p2p app external service P2P port
+    ## @param service.external.ports.rpc app external service RPC port
+    ## @param service.external.ports.prometheus app external service Prometheus port
+    ## @param service.external.ports.tracing app external service Tracing port
+    ports:
+      api: 1317
+      grpc: 9090
+      p2p: 26656
+      rpc: 26657
+    ## Node ports to expose
+    ## @param service.external.nodePorts.api Node port for API
+    ## @param service.external.nodePorts.grpc Node port for gRPC
+    ## @param service.external.nodePorts.p2p Node port for P2P
+    ## @param service.external.nodePorts.rpc Node port for RPC
+    ## @param service.external.nodePorts.prometheus Node port for Prometheus
+    ## @param service.external.nodePorts.tracing Node port for Tracing
+    ## NOTE: choose port between <30000-32767>
+    ##
+    nodePorts:
+      api: ""
+      grpc: ""
+      p2p: ""
+      rpc: ""
+      prometheus: ""
+      tracing: ""
+    ## @param service.external.loadBalancerIP app external service Load Balancer IP
+    ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
+    ##
+    loadBalancerIP: ""
+    ## @param service.external.loadBalancerSourceRanges app external service Load Balancer sources
+    ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
+    ## e.g:
+    ## loadBalancerSourceRanges:
+    ##   - 10.10.10.0/24
+    ##
+    loadBalancerSourceRanges: []
+    ## @param service.external.externalTrafficPolicy app external service external traffic policy
+    ## ref http://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
+    ##
+    externalTrafficPolicy: Cluster
+    ## @param service.external.annotations Additional custom annotations for app external service
+    ##
+    annotations: {}
+    ## @param service.external.extraPorts Extra ports to expose in app external service (normally used with the `sidecars` value)
+    ##
+    extraPorts: []
+    ## @param service.external.sessionAffinity Control where client requests go, to the same pod or round-robin
+    ## Values: ClientIP or None
+    ## ref: https://kubernetes.io/docs/concepts/services-networking/service/
+    ##
+    sessionAffinity: None
+    ## @param service.external.sessionAffinityConfig Additional settings for the sessionAffinity
+    ## sessionAffinityConfig:
+    ##   clientIP:
+    ##     timeoutSeconds: 300
+    ##
+    sessionAffinityConfig: {}
+## Network Policies
+## Ref: https://kubernetes.io/docs/concepts/services-networking/network-policies/
+##
+networkPolicy:
+  ## @param networkPolicy.enabled Specifies whether a NetworkPolicy should be created
+  ##
+  enabled: true
+  ## @param networkPolicy.allowExternal Don't require server label for connections
+  ## The Policy model to apply. When set to false, only pods with the correct
+  ## server label will have network access to the ports server is listening
+  ## on. When true, server will accept connections from any source
+  ## (with the correct destination port).
+  ##
+  allowExternal: true
+  ## @param networkPolicy.allowExternalEgress Allow the pod to access any range of port and all destinations.
+  ##
+  allowExternalEgress: true
+  ## @param networkPolicy.extraIngress [array] Add extra ingress rules to the NetworkPolicy
+  ## e.g:
+  ## extraIngress:
+  ##   - ports:
+  ##       - port: 1234
+  ##     from:
+  ##       - podSelector:
+  ##           - matchLabels:
+  ##               - role: frontend
+  ##       - podSelector:
+  ##           - matchExpressions:
+  ##               - key: role
+  ##                 operator: In
+  ##                 values:
+  ##                   - frontend
+  extraIngress: []
+  ## @param networkPolicy.extraEgress [array] Add extra ingress rules to the NetworkPolicy (ignored if allowExternalEgress=true)
+  ## e.g:
+  ## extraEgress:
+  ##   - ports:
+  ##       - port: 1234
+  ##     to:
+  ##       - podSelector:
+  ##           - matchLabels:
+  ##               - role: frontend
+  ##       - podSelector:
+  ##           - matchExpressions:
+  ##               - key: role
+  ##                 operator: In
+  ##                 values:
+  ##                   - frontend
+  ##
+  extraEgress: []
+  ## @param networkPolicy.ingressNSMatchLabels [object] Labels to match to allow traffic from other namespaces
+  ## @param networkPolicy.ingressNSPodMatchLabels [object] Pod labels to match to allow traffic from other namespaces
+  ##
+  ingressNSMatchLabels: {}
+  ingressNSPodMatchLabels: {}
+
+## @section Persistence Parameters
+##
+
+## Enable persistence using Persistent Volume Claims
+## ref: https://kubernetes.io/docs/concepts/storage/persistent-volumes/
+##
+persistence:
+  ## @param persistence.enabled Enable persistence using Persistent Volume Claims
+  ##
+  enabled: true
+  ## @param persistence.mountPath Path to mount the volume at.
+  ## Note: This value is overridden by 'Values.app.home' in the stateful set.
+  ##
+  mountPath: /bitnami/app/data
+  ## @param persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
+  ##
+  subPath: ""
+  ## @param persistence.storageClass Storage class of backing PVC
+  ## If defined, storageClassName: <storageClass>
+  ## If set to "-", storageClassName: "", which disables dynamic provisioning
+  ## If undefined (the default) or set to null, no storageClassName spec is
+  ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+  ##   GKE, AWS & OpenStack)
+  ##
+  storageClass: ""
+  ## @param persistence.annotations Persistent Volume Claim annotations
+  ##
+  annotations: {}
+  ## @param persistence.accessModes Persistent Volume Access Modes
+  ##
+  accessModes:
+    - ReadWriteOnce
+  ## @param persistence.size Size of data volume
+  ##
+  size: 250Gi
+  ## @param persistence.existingClaim The name of an existing PVC to use for persistence
+  ##
+  existingClaim: ""
+  ## @param persistence.selector Selector to match an existing Persistent Volume for WordPress data PVC
+  ## If set, the PVC can't have a PV dynamically provisioned for it
+  ## E.g.
+  ## selector:
+  ##   matchLabels:
+  ##     app: my-app
+  ##
+  selector: {}
+  ## @param persistence.dataSource Custom PVC data source
+  ##
+  dataSource: {}
+## @section Init Container Parameters
+##
+
+## 'volumePermissions' init container parameters
+## Changes the owner and group of the persistent volume mount point to runAsUser:fsGroup values
+##   based on the *podSecurityContext/*containerSecurityContext parameters
+##
+volumePermissions:
+  ## @param volumePermissions.enabled Enable init container that changes the owner/group of the PV mount point to `runAsUser:fsGroup`
+  ##
+  enabled: false
+  ## OS Shell + Utility image
+  ## ref: https://hub.docker.com/r/bitnami/os-shell/tags/
+  ## @param volumePermissions.image.registry [default: REGISTRY_NAME] OS Shell + Utility image registry
+  ## @param volumePermissions.image.repository [default: REPOSITORY_NAME/os-shell] OS Shell + Utility image repository
+  ## @skip volumePermissions.image.tag OS Shell + Utility image tag (immutable tags are recommended)
+  ## @param volumePermissions.image.pullPolicy OS Shell + Utility image pull policy
+  ## @param volumePermissions.image.pullSecrets OS Shell + Utility image pull secrets
+  ##
+  image:
+    registry: docker.io
+    repository: bitnami/os-shell
+    tag: 12-debian-12-r22
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+  ## Init container's resource requests and limits
+  ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  ## @param volumePermissions.resourcesPreset Set init container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if volumePermissions.resources is set (volumePermissions.resources is recommended for production).
+  ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+  ##
+  resourcesPreset: "nano"
+  ## @param volumePermissions.resources Set init container requests and limits for different resources like CPU or memory (essential for production workloads)
+  ## Example:
+  ## resources:
+  ##   requests:
+  ##     cpu: 2
+  ##     memory: 512Mi
+  ##   limits:
+  ##     cpu: 3
+  ##     memory: 1024Mi
+  ##
+  resources: {}
+  ## Init container Container Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  ## @param volumePermissions.containerSecurityContext.enabled Enabled init container' Security Context
+  ## @param volumePermissions.containerSecurityContext.seLinuxOptions [object,nullable] Set SELinux options in init container
+  ## @param volumePermissions.containerSecurityContext.runAsUser Set init container's Security Context runAsUser
+  ## NOTE: when runAsUser is set to special value "auto", init container will try to chown the
+  ##   data folder to auto-determined user&group, using commands: `id -u`:`id -G | cut -d" " -fc2`
+  ##   "auto" is especially useful for OpenShift which has scc with dynamic user ids (and 0 is not allowed)
+  ##
+  containerSecurityContext:
+    enabled: true
+    seLinuxOptions: {}
+    runAsUser: 0
+
+## @section Other Parameters
+##
+
+## RBAC configuration
+##
+rbac:
+  ## @param rbac.create Specifies whether RBAC resources should be created
+  ##
+  create: false
+  ## @param rbac.rules Custom RBAC rules to set
+  ## e.g:
+  ## rules:
+  ##   - apiGroups:
+  ##       - ""
+  ##     resources:
+  ##       - pods
+  ##     verbs:
+  ##       - get
+  ##       - list
+  ##
+  rules: []
+
+## ServiceAccount configuration
+##
+serviceAccount:
+  ## @param serviceAccount.create Specifies whether a ServiceAccount should be created
+  ##
+  create: true
+  ## @param serviceAccount.name The name of the ServiceAccount to use.
+  ## If not set and create is true, a name is generated using the common.names.fullname template
+  ##
+  name: ""
+  ## @param serviceAccount.annotations Additional Service Account annotations (evaluated as a template)
+  ##
+  annotations: {}
+  ## @param serviceAccount.automountServiceAccountToken Automount service account token for the server service account
+  ##
+  automountServiceAccountToken: true
+
+## Prometheus metrics
+##
+metrics:
+  ## @param metrics.enabled Enable the export of Prometheus metrics
+  ##
+  enabled: false
+  ## Prometheus Operator ServiceMonitor configuration
+  ##
+  serviceMonitor:
+    ## @param metrics.serviceMonitor.enabled if `true`, creates a Prometheus Operator ServiceMonitor (also requires `metrics.enabled` to be `true`)
+    ##
+    enabled: false
+    ## @param metrics.serviceMonitor.namespace Namespace in which Prometheus is running
+    ##
+    namespace: ""
+    ## @param metrics.serviceMonitor.annotations Additional custom annotations for the ServiceMonitor
+    ##
+    annotations: {}
+    ## @param metrics.serviceMonitor.labels Extra labels for the ServiceMonitor
+    ##
+    labels: {}
+    ## @param metrics.serviceMonitor.jobLabel The name of the label on the target service to use as the job name in Prometheus
+    ##
+    jobLabel: ""
+    ## @param metrics.serviceMonitor.honorLabels honorLabels chooses the metric's labels on collisions with target labels
+    ##
+    honorLabels: false
+    ## @param metrics.serviceMonitor.interval Interval at which metrics should be scraped.
+    ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#endpoint
+    ## e.g:
+    ## interval: 10s
+    ##
+    interval: ""
+    ## @param metrics.serviceMonitor.scrapeTimeout Timeout after which the scrape is ended
+    ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#endpoint
+    ## e.g:
+    ## scrapeTimeout: 10s
+    ##
+    scrapeTimeout: ""
+    ## @param metrics.serviceMonitor.metricRelabelings Specify additional relabeling of metrics
+    ##
+    metricRelabelings: []
+    ## @param metrics.serviceMonitor.relabelings Specify general relabeling
+    ##
+    relabelings: []
+    ## @param metrics.serviceMonitor.selector Prometheus instance selector labels
+    ## ref: https://github.com/bitnami/charts/tree/main/bitnami/prometheus-operator#prometheus-configuration
+    ## selector:
+    ##   prometheus: my-prometheus
+    ##
+    selector: {}
