@@ -68,27 +68,27 @@ diagnosticMode:
   args:
     - infinity
 
-## @section celestia-app Parameters
+## @section celestia-node Parameters
 ##
 
 ## %%MAIN_CONTAINER/POD_DESCRIPTION%%
 ##
-app:
-  ## Celestia celestia-app image
-  ## ref: https://github.com/celestiaorg/celestia-app/pkgs/container/celestia-app/versions?filters%5Bversion_type%5D=tagged
-  ## @param app.image.registry [default: REGISTRY_NAME] celestia-app image registry
-  ## @param app.image.repository [default: REPOSITORY_NAME/celestia-app] celestia-app image repository
-  ## @skip app.image.tag celestia-app image tag (immutable tags are recommended)
-  ## @param app.image.digest celestia-app image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
-  ## @param app.image.pullPolicy celestia-app image pull policy
-  ## @param app.image.pullSecrets celestia-app image pull secrets
+node:
+  ## Celestia celestia-node image
+  ## ref: https://github.com/celestiaorg/celestia-node/pkgs/container/celestia-node/versions?filters%5Bversion_type%5D=tagged
+  ## @param node.image.registry [default: REGISTRY_NAME] celestia-node image registry
+  ## @param node.image.repository [default: REPOSITORY_NAME/celestia-node] celestia-node image repository
+  ## @skip node.image.tag celestia-node image tag (immutable tags are recommended)
+  ## @param node.image.digest celestia-node image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
+  ## @param node.image.pullPolicy celestia-node image pull policy
+  ## @param node.image.pullSecrets celestia-node image pull secrets
   ##
   # -- image parameters for the image
   image:
     # -- registry for the image, GitHub Container Registry by default
     registry: ghcr.io
-    # -- repository for the image, celestiaorg/celestia-app by default
-    repository: celestiaorg/celestia-app
+    # -- repository for the image, celestiaorg/celestia-node by default
+    repository: celestiaorg/celestia-node
     # -- tag for the image, v1.9.0 by default
     tag: v1.9.0
     digest: ""
@@ -106,252 +106,139 @@ app:
     ##   - myRegistryKeySecretName
     ##
     pullSecrets: []
-  ## @param app.settings Settings for the celestia-app
+  ## @param node.settings Settings for the celestia-node
   settings:
-    ## @param app.settings.home Home directory for the celestia-app
+    ## @param node.settings.home Home directory for the celestia-node
     ##
-    # -- home directory for the celestia-app, defaults to /home/celestia
+    # -- home directory for the celestia-node, defaults to /home/celestia
     home: "/home/celestia"
-    ## @param app.settings.genesisURL Genesis URL for the celestia-app
+    ## @param node.settings.node_id Node ID for the celestia-node
     ##
-    # -- genesis URL for the celestia-app, it must be set
-    genesisURL: "SET_IT"
-    ## @param app.settings.secret Secret for the celestia-app
+    # -- node ID for the celestia-node, it must be set
+    node_id: "SET_IT"
+    ## @param node.settings.address Address for the celestia-node
+    ##
+    # -- address for the celestia-node, it must be set
+    address: "SET_IT"
+    ## @param node.settings.secret Secret for the celestia-node
     ##
     ## A secret must be available in the cluster with the following format:
     ## - name: <secret-name>
     ## - items:
-    ##     - key: node_key_json
-    ##     - key: priv_validator_key_json
+    ##     - key: NJ3XILLTMVRXEZLUFZVHO5A
+    ##     - key: OAZHALLLMV4Q
+    ##     - key: my_celes_key_info
     secret:
       # -- name of the secret, it must be set
       name: SET_IT
-  ## @param app.config Configuration for the celestia-app
+  ## @param node.config Configuration for the celestia-node
   ##
-  ## @param app.config.apptoml Configuration for the celestia-app app.toml
+  ## @param node.config.apptoml Configuration for the celestia-node node.toml
   ##
-  ## @param app.config.clienttoml Configuration for the celestia-app client.toml
+  ## @param node.config.clienttoml Configuration for the celestia-node client.toml
   ##
-  ## @param app.config.configtoml Configuration for the celestia-app config.toml
+  ## @param node.config.configtoml Configuration for the celestia-node config.toml
   ##
   config:
-    # -- configuration for the celestia-app app.toml
-    apptoml:
-      minimum_gas_prices: 0.002utia
-      pruning: default
-      pruning_keep_recent: "0"
-      pruning_interval: "0"
-      halt_height: 0
-      halt_time: 0
-      min_retain_blocks: 0
-      inter_block_cache: true
-      index_events: []
-      iavl_cache_size: 781250
-      iavl_disable_fastnode: false
-      iavl_lazy_loading: false
-      app_db_backend: ""
-      telemetry:
-        service_name: ""
-        enabled: false
-        enable_hostname: false
-        enable_hostname_label: false
-        enable_service_label: false
-        prometheus_retention_time: 0
-        global_labels: []
-      api:
-        enable: false
-        swagger: false
-        address: tcp://0.0.0.0:1317
-        max_open_connections: 1000
-        rpc_read_timeout: 10
-        rpc_write_timeout: 0
-        rpc_max_body_bytes: 1000000
-        enabled_unsafe_cors: false
-      rosetta:
-        enable: false
-        address: :8080
-        blockchain: app
-        network: network
-        retries: 3
-        offline: false
-        enable_fee_suggestion: false
-        gas_to_suggest: 210000
-        denom_to_suggest: uatom
-      grpc:
-        enable: false
-        address: 0.0.0.0:9090
-        max_recv_msg_size: "10485760"
-        max_send_msg_size: "2147483647"
-      grpc_web:
-        enable: false
-        address: 0.0.0.0:9091
-        enable_unsafe_cors: false
-      state_sync:
-        snapshot_interval: 1500
-        snapshot_keep_recent: 2
-      store:
-        streamers: []
-      streamers:
-        file:
-          keys:
-            - '*'
-          write_dir: ""
-          prefix: ""
-          output_metadata: "true"
-          stop_node_on_error: "true"
-          fsync: "false"
-    # -- configuration for the celestia-app client.toml
-    clienttoml:
-      chain_id: celestia
-      keyring_backend: test
-      output: text
-      node: tcp://localhost:26657
-      broadcast_mode: sync
-    # -- configuration for the celestia-app config.toml
     configtoml:
-      proxy_app: tcp://127.0.0.1:26658
-      moniker: app
-      fast_sync: true
-      db_backend: goleveldb
-      db_dir: data
-      log_level: info
-      log_format: plain
-      genesis_file: config/genesis.json
-      priv_validator_key_file: config/priv_validator_key.json
-      priv_validator_state_file: data/priv_validator_state.json
-      priv_validator_laddr: ""
-      node_key_file: config/node_key.json
-      abci: socket
-      filter_peers: false
-      rpc:
-        laddr: tcp://127.0.0.1:26657
-        cors_allowed_origins: []
-        cors_allowed_methods:
-          - HEAD
-          - GET
-          - POST
-        cors_allowed_headers:
-          - Origin
-          - Accept
-          - Content-Type
-          - X-Requested-With
-          - X-Server-Time
-        grpc_laddr: ""
-        grpc_max_open_connections: 900
-        unsafe: false
-        max_open_connections: 900
-        max_subscription_clients: 100
-        max_subscriptions_per_client: 5
-        experimental_subscription_buffer_size: 200
-        experimental_websocket_write_buffer_size: 200
-        experimental_close_on_slow_client: false
-        timeout_broadcast_tx_commit: 50s
-        max_body_bytes: 8388608
-        max_header_bytes: 1048576
-        tls_cert_file: ""
-        tls_key_file: ""
-        pprof_laddr: localhost:6060
-      p2p:
-        laddr: tcp://0.0.0.0:26656
-        external_address: ""
-        seeds: ""
-        persistent_peers: ""
-        upnp: false
-        addr_book_file: config/addrbook.json
-        addr_book_strict: true
-        max_num_inbound_peers: 40
-        max_num_outbound_peers: 10
-        unconditional_peer_ids: ""
-        persistent_peers_max_dial_period: 0s
-        flush_throttle_timeout: 100ms
-        max_packet_msg_payload_size: 1024
-        send_rate: 5120000
-        recv_rate: 5120000
-        pex: true
-        seed_mode: false
-        private_peer_ids: ""
-        allow_duplicate_ip: false
-        handshake_timeout: 20s
-        dial_timeout: 3s
-      mempool:
-        version: v1
-        recheck: true
-        broadcast: true
-        wal_dir: ""
-        size: 5000
-        max_txs_bytes: 39485440
-        cache_size: 10000
-        keep_invalid_txs_in_cache: false
-        max_tx_bytes: 7897088
-        max_batch_bytes: 0
-        ttl_duration: 1m15s
-        ttl_num_blocks: 5
-        max_gossip_delay: 0s
-      statesync:
-        enable: false
-        rpc_servers: ""
-        trust_height: 0
-        trust_hash: ""
-        trust_period: 168h0m0s
-        discovery_time: 15s
-        temp_dir: ""
-        chunk_request_timeout: 10s
-        chunk_fetchers: "4"
-      fastsync:
-        version: v0
-      consensus:
-        wal_file: data/cs.wal/wal
-        timeout_propose: 10s
-        timeout_propose_delta: 500ms
-        timeout_prevote: 1s
-        timeout_prevote_delta: 500ms
-        timeout_precommit: 1s
-        timeout_precommit_delta: 500ms
-        timeout_commit: 11s
-        double_sign_check_height: 0
-        skip_timeout_commit: false
-        create_empty_blocks: true
-        create_empty_blocks_interval: 0s
-        peer_gossip_sleep_duration: 100ms
-        peer_query_maj23_sleep_duration: 2s
-      storage:
-        discard_abci_responses: true
-      tx_index:
-        indexer: "null"
-        psql_conn: ""
-      instrumentation:
-        prometheus: false
-        prometheus_listen_addr: :26660
-        max_open_connections: 3
-        namespace: cometbft
-        influx_url: ""
-        influx_token: ""
-        influx_bucket: e2e
-        influx_org: celestia
-        influx_batch_size: 20
-        influx_tables:
-          - mempool_tx
-          - mempool_peer_state
-          - mempool_rejected
-          - consensus_round_state
-          - consensus_block_parts
-          - consensus_block
-          - consensus_vote
-        pyroscope_url: ""
-        pyroscope_trace: false
-        pyroscope_profile_types:
-          - cpu
-          - alloc_objects
-          - inuse_objects
-          - goroutines
-          - mutex_count
-          - mutex_duration
-          - block_count
-          - block_duration
-  ## @param app.otelAgent OTel agent configuration for the app
+      Node:
+        StartupTimeout: 20s
+        ShutdownTimeout: 20s
+      Core:
+        IP: ""
+        RPCPort: "26657"
+        GRPCPort: "9090"
+      State:
+        KeyringAccName: ""
+        KeyringBackend: test
+      P2P:
+        ListenAddresses:
+          - /ip4/0.0.0.0/udp/2121/quic-v1/webtransport
+          - /ip6/::/udp/2121/quic-v1/webtransport
+          - /ip4/0.0.0.0/udp/2121/quic-v1
+          - /ip6/::/udp/2121/quic-v1
+          - /ip4/0.0.0.0/tcp/2121
+          - /ip6/::/tcp/2121
+        AnnounceAddresses: []
+        NoAnnounceAddresses:
+          - /ip4/127.0.0.1/udp/2121/quic-v1/webtransport
+          - /ip4/0.0.0.0/udp/2121/quic-v1/webtransport
+          - /ip6/::/udp/2121/quic-v1/webtransport
+          - /ip4/0.0.0.0/udp/2121/quic-v1
+          - /ip4/127.0.0.1/udp/2121/quic-v1
+          - /ip6/::/udp/2121/quic-v1
+          - /ip4/0.0.0.0/tcp/2121
+          - /ip4/127.0.0.1/tcp/2121
+          - /ip6/::/tcp/2121
+        MutualPeers: []
+        PeerExchange: false
+        RoutingTableRefreshPeriod: 1m0s
+        ConnManager:
+          Low: 50
+          High: 100
+          GracePeriod: 1m0s
+      RPC:
+        Address: localhost
+        Port: "26658"
+        SkipAuth: false
+      Gateway:
+        Address: localhost
+        Port: "26659"
+        Enabled: false
+      Share:
+        UseShareExchange: true
+        EDSStoreParams:
+          GCInterval: 0s
+          RecentBlocksCacheSize: 10
+          BlockstoreCacheSize: 128
+        ShrExEDSParams:
+          ServerReadTimeout: 5s
+          ServerWriteTimeout: 1m0s
+          HandleRequestTimeout: 1m0s
+          ConcurrencyLimit: 10
+          BufferSize: 32768
+        ShrExNDParams:
+          ServerReadTimeout: 5s
+          ServerWriteTimeout: 1m0s
+          HandleRequestTimeout: 1m0s
+          ConcurrencyLimit: 10
+        PeerManagerParams:
+          PoolValidationTimeout: 2m0s
+          PeerCooldown: 3s
+          GcInterval: 30s
+          EnableBlackListing: false
+        LightAvailability:
+          SampleAmount: 16
+        Discovery:
+          PeersLimit: 5
+          AdvertiseInterval: 1h0m0s
+      Header:
+        TrustedHash: ""
+        TrustedPeers: []
+        Store:
+          StoreCacheSize: 512
+          IndexCacheSize: 2048
+          WriteBatchSize: 512
+        Syncer:
+          TrustingPeriod: 336h0m0s
+        Server:
+          WriteDeadline: 8s
+          ReadDeadline: 1m0s
+          RangeRequestTimeout: 10s
+        Client:
+          MaxHeadersPerRangeRequest: 64
+          RangeRequestTimeout: 8s
+      DASer:
+        SamplingRange: 100
+        ConcurrencyLimit: 16
+        BackgroundStoreInterval: 10m0s
+        SampleFrom: 1
+        SampleTimeout: 2m40s
+        SamplingWindow: 0s
+  ## @param node.otelAgent OTel agent configuration for the node
   ##
   otelAgent:
-    # -- enable otel agent for the app, false by default
+    # -- enable otel agent for the node, false by default
     enabled: false
     # -- image for the otel agent, ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.102.0 by default
     image:
@@ -381,11 +268,11 @@ app:
     ## - items:
     ##     - key: token
     ##     - key: username
-    # -- grafana otel secret for the app
+    # -- grafana otel secret for the node
     grafanaOtelSecret:
       # -- name of the grafana otel secret, it must be set
       name: SET_IT
-    ## @param app.otelAgent.config Configuration for the otel agent
+    ## @param node.otelAgent.config Configuration for the otel agent
     ##
     # -- config for the otel agent (See: https://opentelemetry.io/docs/collector/configuration/)
     config:
@@ -427,43 +314,40 @@ app:
             level: basic
           logs:
             level: INFO
-  ## @param app.replicaCount Number of app replicas to deploy
+  ## @param node.replicaCount Number of node replicas to deploy
   ##
-  # -- number of app replicas to deploy, 1 by default
+  # -- number of node replicas to deploy, 1 by default
   replicaCount: 1
-  ## @param app.containerPorts.api app API container port
-  ## @param app.containerPorts.grpc app gRPC container port
-  ## @param app.containerPorts.p2p app P2P container port
-  ## @param app.containerPorts.rpc app RPC container port
-  ## @param app.containerPorts.prometheus app Prometheus container port
-  ## @param app.containerPorts.tracing app Tracing container port
+  ## @param node.containerPorts.p2p Node P2P container port
+  ## @param node.containerPorts.rest Node REST container port
+  ## @param node.containerPorts.rpc Node RPC container port
+  ## @param node.containerPorts.profiling Node Profiling container port
+  ## @param node.containerPorts.prometheus Node Prometheus container port
   ##
-  # -- container ports for the app
+  # -- Container ports for the node
   containerPorts:
-    # -- API container port, 1317 by default
-    api: 1317
-    # -- gRPC container port, 9090 by default
-    grpc: 9090
-    # -- P2P container port, 26656 by default
-    p2p: 26656
-    # -- RPC container port, 26657 by default
-    rpc: 26657
-    # -- Prometheus container port, 26660 by default
-    prometheus: 26660
-    # -- Tracing container port, 26661 by default
-    tracing: 26661
-  ## Configure extra options for app containers' liveness and readiness probes
+    # -- P2P container port, 2121 by default
+    p2p: 2121
+    # -- REST container port, 26659 by default
+    rest: 26659
+    # -- RPC container port, 26658 by default
+    rpc: 26658
+    # -- Profiling container port, 6060 by default
+    profiling: 6060
+    # -- Prometheus container port, 8890 by default
+    prometheus: 8890
+  ## Configure extra options for node containers' liveness and readiness probes
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
-  ## @param app.livenessProbe.enabled Enable livenessProbe on app containers
-  ## @param app.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
-  ## @param app.livenessProbe.periodSeconds Period seconds for livenessProbe
-  ## @param app.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
-  ## @param app.livenessProbe.failureThreshold Failure threshold for livenessProbe
-  ## @param app.livenessProbe.successThreshold Success threshold for livenessProbe
+  ## @param node.livenessProbe.enabled Enable livenessProbe on node containers
+  ## @param node.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
+  ## @param node.livenessProbe.periodSeconds Period seconds for livenessProbe
+  ## @param node.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
+  ## @param node.livenessProbe.failureThreshold Failure threshold for livenessProbe
+  ## @param node.livenessProbe.successThreshold Success threshold for livenessProbe
   ##
-  # -- liveness probe for the app
+  # -- liveness probe for the node
   livenessProbe:
-    # -- enable liveness probe on app containers, false by default
+    # -- enable liveness probe on node containers, false by default
     enabled: false
     # -- initial delay seconds for livenessProbe, 0 by default
     initialDelaySeconds: 0
@@ -475,15 +359,15 @@ app:
     failureThreshold: 3
     # -- success threshold for livenessProbe, 1 by default
     successThreshold: 1
-  ## @param app.readinessProbe.enabled Enable readinessProbe on app containers
-  ## @param app.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
-  ## @param app.readinessProbe.periodSeconds Period seconds for readinessProbe
-  ## @param app.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
-  ## @param app.readinessProbe.failureThreshold Failure threshold for readinessProbe
-  ## @param app.readinessProbe.successThreshold Success threshold for readinessProbe
+  ## @param node.readinessProbe.enabled Enable readinessProbe on node containers
+  ## @param node.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
+  ## @param node.readinessProbe.periodSeconds Period seconds for readinessProbe
+  ## @param node.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
+  ## @param node.readinessProbe.failureThreshold Failure threshold for readinessProbe
+  ## @param node.readinessProbe.successThreshold Success threshold for readinessProbe
   ##
   readinessProbe:
-    # -- enable readiness probe on app containers, false by default
+    # -- enable readiness probe on node containers, false by default
     enabled: false
     # -- initial delay seconds for readinessProbe, 0 by default
     initialDelaySeconds: 0
@@ -495,16 +379,16 @@ app:
     failureThreshold: 3
     # -- success threshold for readinessProbe, 1 by default
     successThreshold: 1
-  ## @param app.startupProbe.enabled Enable startupProbe on app containers
-  ## @param app.startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
-  ## @param app.startupProbe.periodSeconds Period seconds for startupProbe
-  ## @param app.startupProbe.timeoutSeconds Timeout seconds for startupProbe
-  ## @param app.startupProbe.failureThreshold Failure threshold for startupProbe
-  ## @param app.startupProbe.successThreshold Success threshold for startupProbe
+  ## @param node.startupProbe.enabled Enable startupProbe on node containers
+  ## @param node.startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
+  ## @param node.startupProbe.periodSeconds Period seconds for startupProbe
+  ## @param node.startupProbe.timeoutSeconds Timeout seconds for startupProbe
+  ## @param node.startupProbe.failureThreshold Failure threshold for startupProbe
+  ## @param node.startupProbe.successThreshold Success threshold for startupProbe
   ##
-  # -- startup probe for the app  
+  # -- startup probe for the node  
   startupProbe:
-    # -- enable startup probe on app containers, false by default
+    # -- enable startup probe on node containers, false by default
     enabled: false
     # -- initial delay seconds for startupProbe, 0 by default
     initialDelaySeconds: 0
@@ -514,24 +398,24 @@ app:
     timeoutSeconds: 1
     # -- failure threshold for startupProbe, 3 by default
     successThreshold: 1
-  ## @param app.customLivenessProbe Custom livenessProbe that overrides the default one
+  ## @param node.customLivenessProbe Custom livenessProbe that overrides the default one
   ##
   customLivenessProbe: {}
-  ## @param app.customReadinessProbe Custom readinessProbe that overrides the default one
+  ## @param node.customReadinessProbe Custom readinessProbe that overrides the default one
   ##
   customReadinessProbe: {}
-  ## @param app.customStartupProbe Custom startupProbe that overrides the default one
+  ## @param node.customStartupProbe Custom startupProbe that overrides the default one
   ##
   customStartupProbe: {}
-  ## app resource requests and limits
+  ## node resource requests and limits
   ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
-  ## @param app.resourcesPreset Set app container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if app.resources is set (app.resources is recommended for production).
+  ## @param node.resourcesPreset Set node container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if node.resources is set (node.resources is recommended for production).
   ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
   ##
-  # -- set app container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if app.resources is set (app.resources is recommended for production)
+  # -- set node container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if node.resources is set (node.resources is recommended for production)
   # -- more information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
   resourcesPreset: "nano"
-  ## @param app.resources Set app container requests and limits for different resources like CPU or memory (essential for production workloads)
+  ## @param node.resources Set node container requests and limits for different resources like CPU or memory (essential for production workloads)
   ## Example:
   ## resources:
   ##   requests:
@@ -541,162 +425,166 @@ app:
   ##     cpu: 3
   ##     memory: 1024Mi
   ##
-  # -- resources for the app
+  # -- resources for the node
   resources:
-    # -- requests for the app
+    # -- requests for the node
     requests:
-      # -- cpu requests for the app, 2 by default
-      cpu: 2
-      # -- memory requests for the app, 8Gi by default
-      memory: 8Gi
-    # -- limits for the app
+      # -- cpu requests for the node, 2 by default
+      cpu: 6
+      # -- memory requests for the node, 8Gi by default
+      memory: 16Gi
+    # -- limits for the node
     limits:
-      # -- cpu limits for the app, 2 by default
-      cpu: 2
-      # -- memory limits for the app, 8Gi by default
-      memory: 8Gi
+      # -- cpu limits for the node, 2 by default
+      cpu: 6
+      # -- memory limits for the node, 8Gi by default
+      memory: 16Gi
   ## Configure Pods Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
-  ## @param app.podSecurityContext.enabled Enable app pods' Security Context
-  ## @param app.podSecurityContext.fsGroupChangePolicy Set filesystem group change policy for app pods
-  ## @param app.podSecurityContext.sysctls Set kernel settings using the sysctl interface for app pods
-  ## @param app.podSecurityContext.supplementalGroups Set filesystem extra groups for app pods
-  ## @param app.podSecurityContext.fsGroup Set fsGroup in app pods' Security Context
+  ## @param node.podSecurityContext.enabled Enable node pods' Security Context
+  ## @param node.podSecurityContext.fsGroupChangePolicy Set filesystem group change policy for node pods
+  ## @param node.podSecurityContext.sysctls Set kernel settings using the sysctl interface for node pods
+  ## @param node.podSecurityContext.supplementalGroups Set filesystem extra groups for node pods
+  ## @param node.podSecurityContext.fsGroup Set fsGroup in node pods' Security Context
   ##
-  # -- pod security context for the app
+  # -- pod security context for the node
   podSecurityContext:
-    # -- enable pod security context for the app, true by default
+    # -- enable pod security context for the node, true by default
     enabled: true
-    # -- filesystem group change policy for app pods, Always by default
+    # -- filesystem group change policy for node pods, Always by default
     fsGroupChangePolicy: Always
-    # -- kernel settings using the sysctl interface for app pods, [] by default
+    # -- kernel settings using the sysctl interface for node pods, [] by default
     sysctls: []
-    # -- filesystem extra groups for app pods, [] by default
+    # -- filesystem extra groups for node pods, [] by default
     supplementalGroups: []
-    # -- fsGroup in app pods' Security Context, 10001 by default
+    # -- fsGroup in node pods' Security Context, 10001 by default
     fsGroup: 10001
   ## Configure Container Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
-  ## @param app.containerSecurityContext.enabled Enabled app container' Security Context
-  ## @param app.containerSecurityContext.seLinuxOptions [object,nullable] Set SELinux options in app container
-  ## @param app.containerSecurityContext.runAsUser Set runAsUser in app container' Security Context
-  ## @param app.containerSecurityContext.runAsNonRoot Set runAsNonRoot in app container' Security Context
-  ## @param app.containerSecurityContext.readOnlyRootFilesystem Set readOnlyRootFilesystem in app container' Security Context
-  ## @param app.containerSecurityContext.privileged Set privileged in app container' Security Context
-  ## @param app.containerSecurityContext.allowPrivilegeEscalation Set allowPrivilegeEscalation in app container' Security Context
-  ## @param app.containerSecurityContext.capabilities.drop List of capabilities to be dropped in app container
-  ## @param app.containerSecurityContext.seccompProfile.type Set seccomp profile in app container
+  ## @param node.containerSecurityContext.enabled Enabled node container' Security Context
+  ## @param node.containerSecurityContext.seLinuxOptions [object,nullable] Set SELinux options in node container
+  ## @param node.containerSecurityContext.runAsUser Set runAsUser in node container' Security Context
+  ## @param node.containerSecurityContext.runAsNonRoot Set runAsNonRoot in node container' Security Context
+  ## @param node.containerSecurityContext.readOnlyRootFilesystem Set readOnlyRootFilesystem in node container' Security Context
+  ## @param node.containerSecurityContext.privileged Set privileged in node container' Security Context
+  ## @param node.containerSecurityContext.allowPrivilegeEscalation Set allowPrivilegeEscalation in node container' Security Context
+  ## @param node.containerSecurityContext.capabilities.drop List of capabilities to be dropped in node container
+  ## @param node.containerSecurityContext.seccompProfile.type Set seccomp profile in node container
   ##
-  # -- container security context for the app
+  # -- container security context for the node
   containerSecurityContext:
-    # -- enable container security context for the app, true by default
+    # -- enable container security context for the node, true by default
     enabled: true
-    # -- SELinux options in app container, {} by default
+    # -- SELinux options in node container, {} by default
     seLinuxOptions: {}
-    # -- runAsUser in app container, 10001 by default
+    # -- runAsUser in node container, 10001 by default
     runAsUser: 10001
-    # -- runAsGroup in app container, 10001 by default
+    # -- runAsGroup in node container, 10001 by default
     runAsGroup: 10001
-    # -- runAsNonRoot in app container, true by default
+    # -- runAsNonRoot in node container, true by default
     runAsNonRoot: true
-    # -- readOnlyRootFilesystem in app container, true by default
+    # -- readOnlyRootFilesystem in node container, true by default
     readOnlyRootFilesystem: true
-    # -- privileged in app container, false by default
+    # -- privileged in node container, false by default
     privileged: false
-    # -- allowPrivilegeEscalation in app container, false by default  
+    # -- allowPrivilegeEscalation in node container, false by default  
     allowPrivilegeEscalation: false
-    # -- capabilities to be dropped in app container, ["ALL"] by default
+    # -- capabilities to be dropped in node container, ["ALL"] by default
     capabilities:
       drop: ["ALL"]
-    # -- seccomp profile in app container, RuntimeDefault by default
+    # -- seccomp profile in node container, RuntimeDefault by default
     seccompProfile:
       type: "RuntimeDefault"
 
-  ## @param app.existingConfigmap The name of an existing ConfigMap with your custom configuration for app
+  ## @param node.existingConfigmap The name of an existing ConfigMap with your custom configuration for node
   ##
   existingConfigmap:
-  ## @param app.command Override default app container command (useful when using custom images)
+  ## @param node.command Override default node container command (useful when using custom images)
   ##
-  # -- command for the celestia-app 
+  # -- command for the celestia-node 
   command:
-    - celestia-appd
-  ## @param app.args Override default app container args (useful when using custom images)
+    # -- celestia-node start --home $(CELESTIA_HOME)
+    - /bin/celestia
+  ## @param node.args Override default node container args (useful when using custom images)
   ##
   args:
+    - bridge
     - start
-    - --home
-    - $(CELESTIA_HOME)
-  ## @param app.automountServiceAccountToken Mount Service Account token in app pods
+    - --node.store="$(CELESTIA_HOME)"
+    - --metrics
+    - --metrics.tls=false
+    - --p2p.metrics
+  ## @param node.automountServiceAccountToken Mount Service Account token in node pods
   ##
-  # -- mount service account token in app pods
+  # -- mount service account token in node pods
   automountServiceAccountToken: false
-  ## @param app.hostAliases app pods host aliases
+  ## @param node.hostAliases node pods host aliases
   ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
   ##
   hostAliases: []
-  ## @param app.daemonsetAnnotations Annotations for app daemonset
+  ## @param node.daemonsetAnnotations Annotations for node daemonset
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
   ##
   daemonsetAnnotations: {}
-  ## @param app.deploymentAnnotations Annotations for app deployment
+  ## @param node.deploymentAnnotations Annotations for node deployment
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
   ##
   deploymentAnnotations: {}
-  ## @param app.statefulsetAnnotations Annotations for app statefulset
+  ## @param node.statefulsetAnnotations Annotations for node statefulset
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
   ##
   statefulsetAnnotations: {}
-  ## @param app.podLabels Extra labels for app pods
+  ## @param node.podLabels Extra labels for node pods
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
   ##
   podLabels: {}
-  ## @param app.podAnnotations Annotations for app pods
+  ## @param node.podAnnotations Annotations for node pods
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
   ##
   podAnnotations: {}
-  ## @param app.podAffinityPreset Pod affinity preset. Ignored if `app.affinity` is set. Allowed values: `soft` or `hard`
+  ## @param node.podAffinityPreset Pod affinity preset. Ignored if `node.affinity` is set. Allowed values: `soft` or `hard`
   ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
   ##
   podAffinityPreset: ""
-  ## @param app.podAntiAffinityPreset Pod anti-affinity preset. Ignored if `app.affinity` is set. Allowed values: `soft` or `hard`
+  ## @param node.podAntiAffinityPreset Pod anti-affinity preset. Ignored if `node.affinity` is set. Allowed values: `soft` or `hard`
   ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
   ##
   podAntiAffinityPreset: soft
-  ## Node app.affinity preset
+  ## Node node.affinity preset
   ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
   ##
   nodeAffinityPreset:
-    ## @param app.nodeAffinityPreset.type Node affinity preset type. Ignored if `app.affinity` is set. Allowed values: `soft` or `hard`
+    ## @param node.nodeAffinityPreset.type Node affinity preset type. Ignored if `node.affinity` is set. Allowed values: `soft` or `hard`
     ##
     type: ""
-    ## @param app.nodeAffinityPreset.key Node label key to match. Ignored if `app.affinity` is set
+    ## @param node.nodeAffinityPreset.key Node label key to match. Ignored if `node.affinity` is set
     ##
     key: ""
-    ## @param app.nodeAffinityPreset.values Node label values to match. Ignored if `app.affinity` is set
+    ## @param node.nodeAffinityPreset.values Node label values to match. Ignored if `node.affinity` is set
     ## E.g.
     ## values:
     ##   - e2e-az1
     ##   - e2e-az2
     ##
     values: []
-  ## @param app.affinity Affinity for app pods assignment
+  ## @param node.affinity Affinity for node pods assignment
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
-  ## NOTE: `app.podAffinityPreset`, `app.podAntiAffinityPreset`, and `app.nodeAffinityPreset` will be ignored when it's set
+  ## NOTE: `node.podAffinityPreset`, `node.podAntiAffinityPreset`, and `node.nodeAffinityPreset` will be ignored when it's set
   ##
   affinity: {}
-  ## @param app.nodeSelector Node labels for app pods assignment
+  ## @param node.nodeSelector Node labels for node pods assignment
   ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
   ##
   nodeSelector: {}
-  ## @param app.tolerations Tolerations for app pods assignment
+  ## @param node.tolerations Tolerations for node pods assignment
   ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
   ##
   tolerations: []
   ## ONLY FOR DEPLOYMENTS:
-  ## @param app.updateStrategy.type app deployment strategy type
+  ## @param node.updateStrategy.type node deployment strategy type
   ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
   ## ONLY FOR STATEFULSETS:
-  ## @param app.updateStrategy.type app statefulset strategy type
+  ## @param node.updateStrategy.type node statefulset strategy type
   ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#update-strategies
   ##
   updateStrategy:
@@ -707,48 +595,48 @@ app:
     ##
     type: RollingUpdate
   ## ONLY FOR STATEFULSETS:
-  ## @param app.podManagementPolicy Pod management policy for app statefulset
+  ## @param node.podManagementPolicy Pod management policy for node statefulset
   ## Ref: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#pod-management-policies
   ##
   podManagementPolicy: OrderedReady
-  ## @param app.priorityClassName app pods' priorityClassName
+  ## @param node.priorityClassName node pods' priorityClassName
   ##
   priorityClassName: ""
-  ## @param app.topologySpreadConstraints Topology Spread Constraints for app pod assignment spread across your cluster among failure-domains
+  ## @param node.topologySpreadConstraints Topology Spread Constraints for node pod assignment spread across your cluster among failure-domains
   ## Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/#spread-constraints-for-pods
   ##
   topologySpreadConstraints: []
-  ## @param app.schedulerName Name of the k8s scheduler (other than default) for app pods
+  ## @param node.schedulerName Name of the k8s scheduler (other than default) for node pods
   ## ref: https://kubernetes.io/docs/tasks/administer-cluster/configure-multiple-schedulers/
   ##
   schedulerName: ""
-  ## @param app.terminationGracePeriodSeconds Seconds app pods need to terminate gracefully
+  ## @param node.terminationGracePeriodSeconds Seconds node pods need to terminate gracefully
   ## ref: https://kubernetes.io/docs/concepts/workloads/pods/pod/#termination-of-pods
   ##
   terminationGracePeriodSeconds: ""
-  ## @param app.lifecycleHooks for app containers to automate configuration before or after startup
+  ## @param node.lifecycleHooks for node containers to automate configuration before or after startup
   ##
   lifecycleHooks: {}
-  ## @param app.extraEnvVars Array with extra environment variables to add to app containers
+  ## @param node.extraEnvVars Array with extra environment variables to add to node containers
   ## e.g:
   ## extraEnvVars:
   ##   - name: FOO
   ##     value: "bar"
   ##
   extraEnvVars: []
-  ## @param app.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for app containers
+  ## @param node.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for node containers
   ##
   extraEnvVarsCM: ""
-  ## @param app.extraEnvVarsSecret Name of existing Secret containing extra env vars for app containers
+  ## @param node.extraEnvVarsSecret Name of existing Secret containing extra env vars for node containers
   ##
   extraEnvVarsSecret: ""
-  ## @param app.extraVolumes Optionally specify extra list of additional volumes for the app pods
+  ## @param node.extraVolumes Optionally specify extra list of additional volumes for the node pods
   ##
   extraVolumes: []
-  ## @param app.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the app containers
+  ## @param node.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the node containers
   ##
   extraVolumeMounts: []
-  ## @param app.sidecars Add additional sidecar containers to the app pods
+  ## @param node.sidecars Add additional sidecar containers to the node pods
   ## e.g:
   ## sidecars:
   ##   - name: your-image-name
@@ -759,7 +647,7 @@ app:
   ##         containerPort: 1234
   ##
   sidecars: []
-  ## @param app.initContainers Add additional init containers to the app pods
+  ## @param node.initContainers Add additional init containers to the node pods
   ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
   ## e.g:
   ## initContainers:
@@ -771,9 +659,9 @@ app:
   initContainers: []
   ## Pod Disruption Budget configuration
   ## ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb
-  ## @param app.pdb.create Enable/disable a Pod Disruption Budget creation
-  ## @param app.pdb.minAvailable Minimum number/percentage of pods that should remain scheduled
-  ## @param app.pdb.maxUnavailable Maximum number/percentage of pods that may be made unavailable
+  ## @param node.pdb.create Enable/disable a Pod Disruption Budget creation
+  ## @param node.pdb.minAvailable Minimum number/percentage of pods that should remain scheduled
+  ## @param node.pdb.maxUnavailable Maximum number/percentage of pods that may be made unavailable
   ##
   pdb:
     create: false
@@ -781,7 +669,7 @@ app:
     maxUnavailable: ""
 
   # TODO: Remove when not needed in the end
-  # TODO: If you add here something remember to add it to:_helpers.tpl (define "app.imagePullSecrets") and NOTES.txt ({{- include "common.warnings.rollingTag" .Values.%%OTHER_OBJECT_BLOCK%%.image }})
+  # TODO: If you add here something remember to add it to:_helpers.tpl (define "node.imagePullSecrets") and NOTES.txt ({{- include "common.warnings.rollingTag" .Values.%%OTHER_OBJECT_BLOCK%%.image }})
 # ## %%SECONDARY_CONTAINER/POD_DESCRIPTION%%
 # ##
 # %%SECONDARY_OBJECT_BLOCK%%:
@@ -795,41 +683,39 @@ app:
 ## @section Traffic Exposure Parameters
 ##
 
-## app service parameters
+## node service parameters
 ##
 # -- service parameters 
 service:
-  ## @param service.internal.type app internal service type
+  ## @param service.internal.type node internal service type
   ##
   # -- service type, ClusterIP by default 
   internal:
+    # -- service type, ClusterIP by default
     type: ClusterIP
-    ## @param service.internal.ports.api app internal service API port
-    ## @param service.internal.ports.grpc app internal service gRPC port
-    ## @param service.internal.ports.p2p app internal service P2P port
-    ## @param service.internal.ports.rpc app internal service RPC port
-    ## @param service.internal.ports.prometheus app internal service Prometheus port
-    ## @param service.internal.ports.tracing app internal service Tracing port
-    # -- ports for the celestia-app 
+    ## @param service.internal.ports.p2p Node internal service P2P port
+    ## @param service.internal.ports.rest Node internal service REST port
+    ## @param service.internal.ports.rpc Node internal service RPC port
+    ## @param service.internal.ports.profiling Node internal service Profiling port
+    ## @param service.internal.ports.prometheus Node internal service Prometheus port
+    # -- Ports for the celestia-node
     ports:
-      # -- api port, 1317 by default  
-      api: 1317
-      # -- grpc port, 9090 by default
-      grpc: 9090
-      # -- p2p port, 26656 by default
-      p2p: 26656
-      # -- rpc port, 26657 by default
-      rpc: 26657
-      # -- prometheus port, 26660 by default
-      prometheus: 26660
-      # -- tracing port, 26661 by default
-      tracing: 26661
-    ## @param service.internal.clusterIP app internal service Cluster IP
+      # -- P2P container port, 2121 by default
+      p2p: 2121
+      # -- REST container port, 26659 by default
+      rest: 26659
+      # -- RPC container port, 26658 by default
+      rpc: 26658
+      # -- Profiling container port, 6060 by default
+      profiling: 6060
+      # -- Prometheus container port, 8890 by default
+      prometheus: 8890
+    ## @param service.internal.clusterIP node internal service Cluster IP
     ## e.g.:
     ## clusterIP: None
     ##
     clusterIP: ""
-    ## @param service.internal.annotations Additional custom annotations for app internal service
+    ## @param service.internal.annotations Additional custom annotations for node internal service
     ##
     annotations: {}
     ## @param service.internal.sessionAffinity Control where client requests go, to the same pod or round-robin
@@ -850,67 +736,61 @@ service:
   external:
     # -- enable external service, true by default 
     enabled: true
-    ## @param service.external.type app external service type
+    ## @param service.external.type node external service type
     ##
     # -- external service type, LoadBalancer by default 
     type: LoadBalancer
-    ## @param service.external.ports.api app external service API port
-    ## @param service.external.ports.grpc app external service gRPC port
-    ## @param service.external.ports.p2p app external service P2P port
-    ## @param service.external.ports.rpc app external service RPC port
-    ## @param service.external.ports.prometheus app external service Prometheus port
-    ## @param service.external.ports.tracing app external service Tracing port
+    ## @param service.external.ports.p2p Node external service P2P port
+    ## @param service.external.ports.rest Node external service REST port
+    ## @param service.external.ports.rpc Node external service RPC port
+    ## @param service.external.ports.profiling Node external service Profiling port
+    ## @param service.external.ports.prometheus Node external service Prometheus port
     ports:
-      # -- api port, 1317 by default
-      api: 1317
-      # -- grpc port, 9090 by default
-      grpc: 9090
-      # -- p2p port, 26656 by default 
-      p2p: 26656
-      # -- rpc port, 26657 by default
-      rpc: 26657
+      # -- P2P container port, 2121 by default
+      p2p: 2121
+      # -- REST container port, 26659 by default
+      rest: 26659
+      # -- RPC container port, 26658 by default
+      rpc: 26658
     ## Node ports to expose
-    ## @param service.external.nodePorts.api Node port for API
-    ## @param service.external.nodePorts.grpc Node port for gRPC
     ## @param service.external.nodePorts.p2p Node port for P2P
+    ## @param service.external.nodePorts.rest Node port for REST
     ## @param service.external.nodePorts.rpc Node port for RPC
+    ## @param service.external.nodePorts.profiling Node port for Profiling
     ## @param service.external.nodePorts.prometheus Node port for Prometheus
-    ## @param service.external.nodePorts.tracing Node port for Tracing
     ## NOTE: choose port between <30000-32767>
     ##
     # -- node ports for the celestia-app
     nodePorts:
-      # -- api port, 1317 by default
-      api: ""
-      # -- grpc port, 9090 by default
-      grpc: ""
-      # -- p2p port, 26656 by default
+      # -- p2p port, 2121 by default
       p2p: ""
-      # -- rpc port, 26657 by default
+      # -- rest port, 26659 by default
+      rest: ""
+      # -- rpc port, 26658 by default
       rpc: ""
-      # -- prometheus port, 26660 by default
+      # -- profiling port, 6060 by default
+      profiling: ""
+      # -- prometheus port, 8890 by default
       prometheus: ""
-      # -- tracing port, 26661 by default
-      tracing: ""
-    ## @param service.external.loadBalancerIP app external service Load Balancer IP
+    ## @param service.external.loadBalancerIP node external service Load Balancer IP
     ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
     ##
     loadBalancerIP: ""
-    ## @param service.external.loadBalancerSourceRanges app external service Load Balancer sources
+    ## @param service.external.loadBalancerSourceRanges node external service Load Balancer sources
     ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
     ## e.g:
     ## loadBalancerSourceRanges:
     ##   - 10.10.10.0/24
     ##
     loadBalancerSourceRanges: []
-    ## @param service.external.externalTrafficPolicy app external service external traffic policy
+    ## @param service.external.externalTrafficPolicy node external service external traffic policy
     ## ref http://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
     ##
     externalTrafficPolicy: Cluster
-    ## @param service.external.annotations Additional custom annotations for app external service
+    ## @param service.external.annotations Additional custom annotations for node external service
     ##
     annotations: {}
-    ## @param service.external.extraPorts Extra ports to expose in app external service (normally used with the `sidecars` value)
+    ## @param service.external.extraPorts Extra ports to expose in node external service (normally used with the `sidecars` value)
     ##
     extraPorts: []
     ## @param service.external.sessionAffinity Control where client requests go, to the same pod or round-robin
@@ -998,10 +878,11 @@ persistence:
   # -- enable persistence, true by default
   enabled: true
   ## @param persistence.mountPath Path to mount the volume at.
-  ## Note: This value is overridden by 'Values.app.settings.home' in the stateful set.
+  ## Note: This value is overridden by 'Values.node.settings.home' in the stateful set.
   ##
   mountPath: /bitnami/app/data
   ## @param persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
+  ## Note: This is not used in the stateufulset template
   ##
   subPath: ""
   ## @param persistence.storageClass Storage class of backing PVC

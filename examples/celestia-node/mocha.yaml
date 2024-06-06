@@ -1,0 +1,58 @@
+commonLabels:
+  chain_id: mocha-4
+  environment: mocha
+  network: da
+  type: bridge
+persistence:
+  size: 5000Gi
+  storageClassName: "sbs-15k"
+  dataSource:
+    apiGroup: snapshot.storage.k8s.io
+    kind: VolumeSnapshot
+    name: da-latest
+node:
+  otelAgent:
+    enabled: true
+    grafanaOtelSecret:
+      name: grafana-otel-token
+  resources:
+    requests:
+      cpu: 6
+      memory: 24Gi
+    limits:
+      cpu: 6
+      memory: 24Gi
+  livenessProbe:
+    enabled: true
+    failureThreshold: 3
+  readinessProbe:
+    enabled: true
+    failureThreshold: 30
+  startupProbe:
+    enabled: true
+    failureThreshold: 30
+  args:
+    - bridge
+    - start
+    - --p2p.network=mocha-4
+    - --node.store="$(CELESTIA_HOME)"
+    - --metrics
+    - --metrics.tls=false
+    - --p2p.metrics
+    - --pyroscope
+    - --pyroscope.tracing
+    - --pyroscope.endpoint http://pyroscope:4040
+    - --tracing
+    - --tracing.tls=false
+  settings:
+    secret:
+      name: keys-da-bridge-1
+  config:
+    configtoml:
+      Core:
+        IP: 10.43.176.219
+      RPC:
+        Address: 0.0.0.0
+      Gateway:
+        Enabled: true
+        Address: 0.0.0.0

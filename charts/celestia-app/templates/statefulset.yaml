@@ -279,7 +279,11 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.app.otelAgent.grafanaOtelSecret.name }}
                   key: token
+          {{- if .Values.app.otelAgent.resources }}
           resources: {{- toYaml .Values.app.otelAgent.resources | nindent 12 }}
+          {{- else if ne .Values.app.otelAgent.resourcesPreset "none" }}
+          resources: {{- include "common.resources.preset" (dict "type" .Values.app.otelAgent.resourcesPreset) | nindent 12 }}
+          {{- end }}
           volumeMounts:
             - name: otel-agent-config
               mountPath: /etc/otelcol-contrib/config.yaml

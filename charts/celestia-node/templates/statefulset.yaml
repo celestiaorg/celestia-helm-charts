@@ -1,0 +1,375 @@
+apiVersion: {{ include "common.capabilities.statefulset.apiVersion" . }}
+kind: StatefulSet
+metadata:
+  name: {{ template "common.names.fullname" . }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: node
+  {{- if or .Values.node.statefulsetAnnotations .Values.commonAnnotations }}
+  {{- $annotations := include "common.tplvalues.merge" (dict "values" (list .Values.node.statefulsetAnnotations .Values.commonAnnotations) "context" .) }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" $annotations "context" $ ) | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.node.replicaCount }}
+  podManagementPolicy: {{ .Values.node.podManagementPolicy | quote }}
+  {{- $podLabels := include "common.tplvalues.merge" (dict "values" (list .Values.node.podLabels .Values.commonLabels) "context" .) }}
+  selector:
+    matchLabels: {{- include "common.labels.matchLabels" ( dict "customLabels" $podLabels "context" $ ) | nindent 6 }}
+      app.kubernetes.io/component: node
+  serviceName: {{ template "common.names.fullname" . }}
+  {{- if .Values.node.updateStrategy }}
+  updateStrategy: {{- toYaml .Values.node.updateStrategy | nindent 4 }}
+  {{- end }}
+  template:
+    metadata:
+      {{- if .Values.node.podAnnotations }}
+      annotations: {{- include "common.tplvalues.render" (dict "value" .Values.node.podAnnotations "context" $) | nindent 8 }}
+      {{- end }}
+      labels: {{- include "common.labels.standard" ( dict "customLabels" $podLabels "context" $ ) | nindent 8 }}
+        app.kubernetes.io/component: node
+    spec:
+      {{- include "node.imagePullSecrets" . | nindent 6 }}
+      serviceAccountName: {{ template "node.serviceAccountName" . }}
+      automountServiceAccountToken: {{ .Values.node.automountServiceAccountToken }}
+      {{- if .Values.node.hostAliases }}
+      hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.node.hostAliases "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.node.affinity }}
+      affinity: {{- include "common.tplvalues.render" ( dict "value" .Values.node.affinity "context" $) | nindent 8 }}
+      {{- else }}
+      affinity:
+        podAffinity: {{- include "common.affinities.pods" (dict "type" .Values.node.podAffinityPreset "component" "app" "customLabels" $podLabels "context" $) | nindent 10 }}
+        podAntiAffinity: {{- include "common.affinities.pods" (dict "type" .Values.node.podAntiAffinityPreset "component" "app" "customLabels" $podLabels "context" $) | nindent 10 }}
+        nodeAffinity: {{- include "common.affinities.nodes" (dict "type" .Values.node.nodeAffinityPreset.type "key" .Values.node.nodeAffinityPreset.key "values" .Values.node.nodeAffinityPreset.values) | nindent 10 }}
+      {{- end }}
+      {{- if .Values.node.nodeSelector }}
+      nodeSelector: {{- include "common.tplvalues.render" ( dict "value" .Values.node.nodeSelector "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.node.tolerations }}
+      tolerations: {{- include "common.tplvalues.render" (dict "value" .Values.node.tolerations "context" .) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.node.priorityClassName }}
+      priorityClassName: {{ .Values.node.priorityClassName | quote }}
+      {{- end }}
+      {{- if .Values.node.schedulerName }}
+      schedulerName: {{ .Values.node.schedulerName | quote }}
+      {{- end }}
+      {{- if .Values.node.topologySpreadConstraints }}
+      topologySpreadConstraints: {{- include "common.tplvalues.render" (dict "value" .Values.node.topologySpreadConstraints "context" .) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.node.podSecurityContext.enabled }}
+      securityContext: {{- omit .Values.node.podSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- end }}
+      {{- if .Values.node.terminationGracePeriodSeconds }}
+      terminationGracePeriodSeconds: {{ .Values.node.terminationGracePeriodSeconds }}
+      {{- end }}
+      initContainers:
+        {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
+        - name: volume-permissions
+          image: {{ include "node.volumePermissions.image" . }}
+          imagePullPolicy: {{ .Values.volumePermissions.image.pullPolicy | quote }}
+          command:
+            - chown -R {{ .Values.securityContext.runAsUser }}:{{ .Values.securityContext.fsGroup }} {{ .Values.node.settings.home }}/data
+          {{- if .Values.volumePermissions.containerSecurityContext.enabled }}
+          securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.volumePermissions.containerSecurityContext "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.volumePermissions.resources }}
+          resources: {{- toYaml .Values.volumePermissions.resources | nindent 12 }}
+          {{- else if ne .Values.volumePermissions.resourcesPreset "none" }}
+          resources: {{- include "common.resources.preset" (dict "type" .Values.volumePermissions.resourcesPreset) | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: data
+              mountPath: {{ .Values.node.settings.home }}/data
+              {{- if .Values.persistence.subPath }}
+              subPath: {{ .Values.persistence.subPath }}
+              {{- end }}
+        {{- end }}
+        - name: create-priv-validator-state
+          image: busybox
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: CELESTIA_HOME
+              value: {{ .Values.node.settings.home }}
+          command:
+            - sh
+            - -c
+            - |
+              if [[ ! -f ${CELESTIA_HOME}/data/priv_validator_state.json ]]
+              then
+                  mkdir -p ${CELESTIA_HOME}/data
+                  cat <<EOF > ${CELESTIA_HOME}/data/priv_validator_state.json
+              {
+                "height": "0",
+                "round": 0,
+                "step": 0
+              }
+              EOF
+              fi
+          volumeMounts:
+            - name: data
+              mountPath: {{ .Values.node.settings.home }}/data
+        - name: download-genesis
+          image: busybox
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+            - |
+              mkdir -p /genesis
+              wget -O /genesis/genesis.json {{ .Values.node.settings.genesisURL }}
+              if ! command -v jq &> /dev/null; then
+                echo "jq not found, installing..."
+                wget -O /bin/jq https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64
+                chmod +x /bin/jq
+              fi
+              if jq -e '.result.genesis' /genesis/genesis.json > /dev/null; then
+                jq '.result.genesis' /genesis/genesis.json > /genesis/genesis.json.tmp
+                mv /genesis/genesis.json.tmp /genesis/genesis.json
+              fi
+          volumeMounts:
+            - name: genesis
+              mountPath: /genesis
+        {{- if .Values.node.initContainers }}
+          {{- include "common.tplvalues.render" (dict "value" .Values.node.initContainers "context" $) | nindent 8 }}
+        {{- end }}
+      containers:
+        - name: app
+          image: {{ template "node.image" . }}
+          imagePullPolicy: {{ .Values.node.image.pullPolicy }}
+          {{- if .Values.node.containerSecurityContext.enabled }}
+          securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.node.containerSecurityContext "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.diagnosticMode.enabled }}
+          command: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.command "context" $) | nindent 12 }}
+          {{- else if .Values.node.command }}
+          command: {{- include "common.tplvalues.render" (dict "value" .Values.node.command "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.diagnosticMode.enabled }}
+          args: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.args "context" $) | nindent 12 }}
+          {{- else if .Values.node.args }}
+          args: {{- include "common.tplvalues.render" (dict "value" .Values.node.args "context" $) | nindent 12 }}
+          {{- end }}
+          env:
+            - name: CELESTIA_HOME
+              value: {{ .Values.node.settings.home }}
+            {{- if .Values.node.extraEnvVars }}
+            {{- include "common.tplvalues.render" (dict "value" .Values.node.extraEnvVars "context" $) | nindent 12 }}
+            {{- end }}
+          envFrom:
+            {{- if .Values.node.extraEnvVarsCM }}
+            - configMapRef:
+                name: {{ include "common.tplvalues.render" (dict "value" .Values.node.extraEnvVarsCM "context" $) }}
+            {{- end }}
+            {{- if .Values.node.extraEnvVarsSecret }}
+            - secretRef:
+                name: {{ include "common.tplvalues.render" (dict "value" .Values.node.extraEnvVarsSecret "context" $) }}
+            {{- end }}
+          {{- if .Values.node.resources }}
+          resources: {{- toYaml .Values.node.resources | nindent 12 }}
+          {{- else if ne .Values.node.resourcesPreset "none" }}
+          resources: {{- include "common.resources.preset" (dict "type" .Values.node.resourcesPreset) | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: api
+              containerPort: {{ .Values.node.containerPorts.api }}
+            - name: grpc
+              containerPort: {{ .Values.node.containerPorts.grpc }}
+            - name: p2p
+              containerPort: {{ .Values.node.containerPorts.p2p }}
+            - name: rpc
+              containerPort: {{ .Values.node.containerPorts.rpc }}
+            - name: prometheus
+              containerPort: {{ .Values.node.containerPorts.prometheus }}
+            - name: tracing
+              containerPort: {{ .Values.node.containerPorts.tracing }}
+          {{- if not .Values.diagnosticMode.enabled }}
+          {{- if .Values.node.customLivenessProbe }}
+          livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.node.customLivenessProbe "context" $) | nindent 12 }}
+          {{- else if .Values.node.livenessProbe.enabled }}
+          livenessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.node.livenessProbe "enabled") "context" $) | nindent 12 }}
+            tcpSocket:
+              port: rpc
+          {{- end }}
+          {{- if .Values.node.customReadinessProbe }}
+          readinessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.node.customReadinessProbe "context" $) | nindent 12 }}
+          {{- else if .Values.node.readinessProbe.enabled }}
+          readinessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.node.readinessProbe "enabled") "context" $) | nindent 12 }}
+            exec:
+              command:
+                - sh
+                - '-c'
+                - >
+                  response=$(wget --timeout=1 -qO- --header="Accept:
+                  application/json" "http://localhost:26657/status"); if [ "$?" -eq
+                  0 ] && echo "$response" | grep -q '"catching_up":false'; then
+                      echo "Not Catching up";
+                      exit 0;
+                  else
+                      echo "Catching up";
+                      exit 1;
+                  fi
+          {{- end }}
+          {{- if .Values.node.customStartupProbe }}
+          startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.node.customStartupProbe "context" $) | nindent 12 }}
+          {{- else if .Values.node.startupProbe.enabled }}
+          startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.node.startupProbe "enabled") "context" $) | nindent 12 }}
+            tcpSocket:
+              port: rpc
+          {{- end }}
+          {{- end }}
+          {{- if .Values.node.lifecycleHooks }}
+          lifecycle: {{- include "common.tplvalues.render" (dict "value" .Values.node.lifecycleHooks "context" $) | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: data
+              mountPath: {{ .Values.node.settings.home }}/data
+              subPath: data
+              readOnly: false
+            - name: data
+              mountPath: {{ .Values.node.settings.home }}/blocks
+              subPath: blocks
+              readOnly: false
+            - name: data
+              mountPath: {{ .Values.node.settings.home }}/index
+              subPath: index
+              readOnly: false
+            - name: data
+              mountPath: {{ .Values.node.settings.home }}/inverted_index
+              subPath: inverted_index
+              readOnly: false
+            - name: data
+              mountPath: {{ .Values.node.settings.home }}/transients
+              subPath: transients
+              readOnly: false
+            - name: nj3xilltmvrxezlufzvho5a
+              mountPath: {{ .Values.node.settings.home }}/keys/NJ3XILLTMVRXEZLUFZVHO5A
+              subPath: NJ3XILLTMVRXEZLUFZVHO5A
+            - name: oazhalllmv4q
+              mountPath: {{ .Values.node.settings.home }}/keys/OAZHALLLMV4Q
+              subPath: OAZHALLLMV4Q
+            - name: celes-key
+              mountPath: {{ .Values.node.settings.home }}/keys/keyring-test/my_celes_key.info
+              subPath: my_celes_key.info
+            - name: address
+              mountPath: {{ .Values.node.settings.home }}/keys/keyring-test/{{ .Values.node.settings.node_id }}.address
+              subPath: address
+            - name: genesis
+              mountPath: {{ .Values.node.settings.home }}/config/genesis.json
+              subPath: genesis.json
+            - name: config-dir # This is needed so that the process as permissions to create files in the config directory
+              mountPath: {{ .Values.node.settings.home }}/config
+            - name: configtoml
+              mountPath: {{ .Values.node.settings.home }}/config.toml
+              subPath: config.toml
+          {{- if .Values.node.extraVolumeMounts }}
+          {{- include "common.tplvalues.render" (dict "value" .Values.node.extraVolumeMounts "context" $) | nindent 12 }}
+          {{- end }}
+        - name: otel-agent
+          image: {{ template "node.otelAgent.image" . }}
+          imagePullPolicy: {{ .Values.node.otelAgent.image.pullPolicy }}
+          ports:
+            - containerPort: 4317
+              name: otlp-grpc
+            - containerPort: 4318
+              name: otlp-http
+            - containerPort: 8888
+              name: prom-collector
+            - containerPort: 8889
+              name: prom-exporter
+          command:
+            - "/otelcol-contrib"
+            - "--config=/etc/otelcol-contrib/config.yaml"
+          env:
+            - name: JOB_NAME
+              value: {{ template "common.names.fullname" . }}-{{ .Release.Namespace }}
+            - name: GRAFANA_OTEL_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.node.otelAgent.grafanaOtelSecret.name }}
+                  key: username
+            - name: GRAFANA_OTEL_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.node.otelAgent.grafanaOtelSecret.name }}
+                  key: token
+          {{- if .Values.node.otelAgent.resources }}
+          resources: {{- toYaml .Values.node.otelAgent.resources | nindent 12 }}
+          {{- else if ne .Values.node.otelAgent.resourcesPreset "none" }}
+          resources: {{- include "common.resources.preset" (dict "type" .Values.node.otelAgent.resourcesPreset) | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: otel-agent-config
+              mountPath: /etc/otelcol-contrib/config.yaml
+              subPath: config.yaml
+        {{- if .Values.node.sidecars }}
+        {{- include "common.tplvalues.render" ( dict "value" .Values.node.sidecars "context" $) | nindent 8 }}
+        {{- end }}
+      volumes:
+        - name: nj3xilltmvrxezlufzvho5a
+          secret:
+            secretName: {{ .Values.node.settings.secret.name }}
+            items:
+              - key: NJ3XILLTMVRXEZLUFZVHO5A
+                path: NJ3XILLTMVRXEZLUFZVHO5A
+            defaultMode: 384
+        - name: oazhalllmv4q
+          secret:
+            secretName: {{ .Values.node.settings.secret.name }}
+            items:
+              - key: OAZHALLLMV4Q
+                path: OAZHALLLMV4Q
+            defaultMode: 384
+        - name: celes-key
+          secret:
+            secretName: {{ .Values.node.settings.secret.name }}
+            items:
+              - key: my_celes_key_info
+                path: my_celes_key.info
+            defaultMode: 384
+        - name: genesis
+          emptyDir: {}
+        - name: config-dir
+          emptyDir: {}
+        - name: configtoml
+          configMap:
+            name: {{ template "common.names.fullname" . }}-configtoml
+        - name: address
+          configMap:
+            name: {{ template "common.names.fullname" . }}-address
+        - name: otel-agent-config
+          configMap:
+            name: {{ template "common.names.fullname" . }}-otel-agent
+            items:
+              - key: config.yaml
+                path: config.yaml
+        {{- if .Values.node.extraVolumes }}
+        {{- include "common.tplvalues.render" (dict "value" .Values.node.extraVolumes "context" $) | nindent 8 }}
+        {{- end }}
+  {{- if .Values.persistence.enabled }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+        {{- if or .Values.persistence.annotations .Values.commonAnnotations }}
+        {{- $claimAnnotations := include "common.tplvalues.merge" (dict "values" .Values.persistence.annotations .Values.commonAnnotations "context" .) | fromYaml }}
+        annotations: {{- include "common.tplvalues.render" ( dict "value" $claimAnnotations "context" $ ) | nindent 10 }}
+        {{- end }}
+        {{- if .Values.commonLabels }}
+        labels: {{- include "common.labels.matchLabels" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 10 }}
+        {{- end }}
+      spec:
+        accessModes:
+        {{- range .Values.persistence.accessModes }}
+          - {{ . | quote }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.persistence.size | quote }}
+        {{- if .Values.persistence.selector }}
+        selector: {{- include "common.tplvalues.render" (dict "value" .Values.persistence.selector "context" $) | nindent 10 }}
+        {{- end }}
+        {{- if .Values.persistence.dataSource }}
+        dataSource: {{- include "common.tplvalues.render" (dict "value" .Values.persistence.dataSource "context" $) | nindent 10 }}
+        {{- end }}
+        {{- include "common.storage.class" (dict "persistence" .Values.persistence "global" .Values.global) | nindent 2 }}
+  {{- end }}

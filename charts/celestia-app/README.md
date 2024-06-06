@@ -27,9 +27,11 @@ Celestia App
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | app.affinity | object | `{}` |  |
-| app.args | list | `[]` |  |
+| app.args[0] | string | `"start"` |  |
+| app.args[1] | string | `"--home"` |  |
+| app.args[2] | string | `"$(CELESTIA_HOME)"` |  |
 | app.automountServiceAccountToken | bool | `false` | mount service account token in app pods |
-| app.command | list | `["celestia-appd","start","--home","$(CELESTIA_HOME)"]` | command for the celestia-app  |
+| app.command | list | `["celestia-appd"]` | command for the celestia-app  |
 | app.config.apptoml.api.address | string | `"tcp://0.0.0.0:1317"` |  |
 | app.config.apptoml.api.enable | bool | `false` |  |
 | app.config.apptoml.api.enabled_unsafe_cors | bool | `false` |  |
@@ -267,13 +269,8 @@ Celestia App
 | app.otelAgent.grafanaOtelSecret | object | `{"name":"SET_IT"}` | grafana otel secret for the app |
 | app.otelAgent.grafanaOtelSecret.name | string | `"SET_IT"` | name of the grafana otel secret, it must be set |
 | app.otelAgent.image | object | `{"digest":"","pullPolicy":"IfNotPresent","registry":"ghcr.io","repository":"open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib","tag":"0.102.0"}` | image for the otel agent, ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.102.0 by default |
-| app.otelAgent.resources | object | `{"limits":{"cpu":"200m","memory":"200Mi"},"requests":{"cpu":"100m","memory":"100Mi"}}` | resources for the otel agent |
-| app.otelAgent.resources.limits | object | `{"cpu":"200m","memory":"200Mi"}` | limits for the otel agent |
-| app.otelAgent.resources.limits.cpu | string | `"200m"` | cpu limits for the otel agent, 200m by default |
-| app.otelAgent.resources.limits.memory | string | `"200Mi"` | memory limits for the otel agent, 200Mi by default |
-| app.otelAgent.resources.requests | object | `{"cpu":"100m","memory":"100Mi"}` | requests for the otel agent |
-| app.otelAgent.resources.requests.cpu | string | `"100m"` | cpu requests for the otel agent, 100m by default |
-| app.otelAgent.resources.requests.memory | string | `"100Mi"` | memory requests for the otel agent, 100Mi by default |
+| app.otelAgent.resources | object | `{}` |  |
+| app.otelAgent.resourcesPreset | string | `"nano"` |  |
 | app.pdb.create | bool | `false` |  |
 | app.pdb.maxUnavailable | string | `""` |  |
 | app.pdb.minAvailable | int | `1` |  |
@@ -348,16 +345,7 @@ Celestia App
 | namespaceOverride | string | `""` |  |
 | networkPolicy | with the correct destination port | `{"allowExternal":true,"allowExternalEgress":true,"enabled":true,"extraEgress":[],"extraIngress":[],"ingressNSMatchLabels":{},"ingressNSPodMatchLabels":{}}` | . |
 | networkPolicy.enabled | bool | `true` | enable network policy, true by default |
-| persistence.accessModes[0] | string | `"ReadWriteOnce"` |  |
-| persistence.annotations | object | `{}` |  |
-| persistence.dataSource | object | `{}` |  |
-| persistence.enabled | bool | `true` |  |
-| persistence.existingClaim | string | `""` |  |
-| persistence.mountPath | string | `"/bitnami/app/data"` |  |
-| persistence.selector | object | `{}` |  |
-| persistence.size | string | `"250Gi"` |  |
-| persistence.storageClass | string | `""` |  |
-| persistence.subPath | string | `""` |  |
+| persistence | object | `{"accessModes":["ReadWriteOnce"],"annotations":{},"dataSource":{},"enabled":true,"existingClaim":"","mountPath":"/bitnami/app/data","selector":{},"size":"250Gi","storageClass":"","subPath":""}` | persistence parameters |
 | rbac.create | bool | `false` |  |
 | rbac.rules | list | `[]` |  |
 | service.external | object | `{"annotations":{},"enabled":true,"externalTrafficPolicy":"Cluster","extraPorts":[],"loadBalancerIP":"","loadBalancerSourceRanges":[],"nodePorts":{"api":"","grpc":"","p2p":"","prometheus":"","rpc":"","tracing":""},"ports":{"api":1317,"grpc":9090,"p2p":26656,"rpc":26657},"sessionAffinity":"None","sessionAffinityConfig":{},"type":"LoadBalancer"}` | external service parameters |
