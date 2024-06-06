@@ -199,3 +199,17 @@ data:
     pyroscope_url = "{{ .Values.app.config.configtoml.instrumentation.pyroscope_url }}"
     pyroscope_trace = {{ .Values.app.config.configtoml.instrumentation.pyroscope_trace }}
     pyroscope_profile_types = [{{ range $index, $element := .Values.app.config.configtoml.instrumentation.pyroscope_profile_types }}{{ if $index }}, {{ end }}"{{ $element }}"{{ end }}]
+
+{{- if .Values.app.otelAgent.enabled }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "common.names.fullname" . }}-otel-agent
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: otel-agent
+data:
+  config.yaml: |
+{{ toYaml .Values.app.otelAgent.config | indent 4 }}
+{{- end }}

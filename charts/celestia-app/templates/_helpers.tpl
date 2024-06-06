@@ -35,14 +35,12 @@ Create the name of the service account to use
 {{- end -}}
 {{- end -}}
 
+
 {{/*
-Return true if cert-manager required annotations for TLS signed certificates are set in the Ingress annotations
-Ref: https://cert-manager.io/docs/usage/ingress/#supported-annotations
+Return the proper image name for the otel agent
 */}}
-{{- define "app.ingress.certManagerRequest" -}}
-{{ if or (hasKey . "cert-manager.io/cluster-issuer") (hasKey . "cert-manager.io/issuer") }}
-    {{- true -}}
-{{- end -}}
+{{- define "app.otelAgent.image" -}}
+{{- include "common.images.image" (dict "imageRoot" .Values.app.otelAgent.image "global" .Values.global) -}}
 {{- end -}}
 
 # TODO: add validations for values

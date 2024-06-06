@@ -19,8 +19,8 @@ keywords:
   - celestia
   - celestia-app
 maintainers:
-  - name: Broadcom, Inc. All Rights Reserved.
-    url: https://github.com/bitnami/charts
+  - name: Celestia Labs
+    url: https://github.com/celestiaorg/celestia-helm-charts
 name: celestia-app
 sources:
   - https://github.com/celestiaorg/celestia-app

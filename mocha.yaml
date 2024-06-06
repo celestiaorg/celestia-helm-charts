@@ -1,0 +1,52 @@
+commonLabels:
+  chain_id: mocha-4
+  environment: mocha
+  network: consensus
+  type: full
+persistence:
+  size: 1200Gi
+  storageClassName: "sbs-15k"
+  dataSource:
+    apiGroup: snapshot.storage.k8s.io
+    kind: VolumeSnapshot
+    name: consensus-latest
+app:
+  otelAgent:
+    enabled: true
+    grafanaOtelSecret:
+      name: grafana-otel-token
+  secret:
+    name: keys-consensus-1
+  resources:
+    requests:
+      cpu: 6
+      memory: 24Gi
+    limits:
+      cpu: 6
+      memory: 24Gi
+  livenessProbe:
+    enabled: true
+    failureThreshold: 3
+  readinessProbe:
+    enabled: true
+    failureThreshold: 30
+  startupProbe:
+    enabled: true
+    failureThreshold: 30
+  genesisURL: "https://raw.githubusercontent.com/celestiaorg/networks/master/mocha-4/genesis.json"
+  config:
+    clienttoml:
+      chain_id: "mocha-4"
+    configtoml:
+      p2p:
+        seeds: "ee9f90974f85c59d3861fc7f7edb10894f6ac3c8@seed-mocha.pops.one:26656,258f523c96efde50d5fe0a9faeea8a3e83be22ca@seed.mocha-4.celestia.aviaone.com:20279,5d0bf034d6e6a8b5ee31a2f42f753f1107b3a00e@celestia-testnet-seed.itrocket.net:11656,7da0fb48d6ef0823bc9770c0c8068dd7c89ed4ee@celest-test-seed.theamsolutions.info:443"
+        persistent_peers: "34499b1ac473fbb03894c883178ecc83f0d6eaf6@64.227.18.169:26656,43e9da043318a4ea0141259c17fcb06ecff816af@rpc-1.celestia.nodes.guru:43656,f9e950870eccdb40e2386896d7b6a7687a103c99@rpc-2.celestia.nodes.guru:43656,daf2cecee2bd7f1b3bf94839f993f807c6b15fbf@celestia-testnet-peer.itrocket.net:11656"
+      instrumentation:
+        prometheus: true
+        pyroscope_url: "http://pyroscope:4040"
+        pyroscope_tracing: true
+      tx_index:
+        indexer: "kv"
+      rpc:
+        laddr: "tcp://0.0.0.0:26657"
+        max_subscriptions_per_client: 1000

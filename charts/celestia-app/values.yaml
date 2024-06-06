@@ -82,7 +82,6 @@ app:
   ## @param app.image.digest celestia-app image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
   ## @param app.image.pullPolicy celestia-app image pull policy
   ## @param app.image.pullSecrets celestia-app image pull secrets
-  ## @param app.image.debug Enable celestia-app image debug mode
   ##
   image:
     registry: ghcr.io
@@ -102,7 +101,6 @@ app:
     ##   - myRegistryKeySecretName
     ##
     pullSecrets: []
-    debug: false
   ## @param app.replicaCount Number of app replicas to deploy
   ##
   replicaCount: 1
@@ -235,6 +233,70 @@ app:
       drop: ["ALL"]
     seccompProfile:
       type: "RuntimeDefault"
+
+  otelAgent:
+    enabled: false
+    image:
+      registry: ghcr.io
+      repository: open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib
+      tag: 0.102.0
+      digest: ""
+      pullPolicy: IfNotPresent
+    resources:
+      requests:
+        cpu: 100m
+        memory: 100Mi
+      limits:
+        cpu: 200m
+        memory: 200Mi
+    ## A secret must be available in the cluster with the following format:
+    ## - name: <secret-name>
+    ## - items:
+    ##     - key: token
+    ##       path: token
+    ##     - key: username
+    ##       path: username
+    grafanaOtelSecret:
+      name: SET_IT
+    config:
+      extensions:
+        basicauth/otlp:
+          client_auth:
+            username: "${GRAFANA_OTEL_USERNAME}"
+            password: "${GRAFANA_OTEL_TOKEN}"
+      receivers:
+        otlp:
+          protocols:
+            grpc:
+              endpoint: "localhost:4317"
+            http:
+              endpoint: "localhost:4318"
+        prometheus:
+          config:
+            scrape_configs:
+              - job_name: "${JOB_NAME}"
+                scrape_interval: 10s
+                static_configs:
+                  - targets: ["localhost:26660"]
+      exporters:
+        otlphttp:
+          auth:
+            authenticator: basicauth/otlp
+          endpoint: https://otlp-gateway-prod-us-central-0.grafana.net/otlp
+        prometheus:
+          endpoint: "localhost:8889"
+      service:
+        extensions: [basicauth/otlp]
+        pipelines:
+          metrics:
+            receivers: [otlp, prometheus]
+            exporters: [otlphttp, prometheus]
+        telemetry:
+          metrics:
+            address: "localhost:8888"
+            level: basic
+          logs:
+            level: INFO
 
   home: "/home/celestia"
   genesisURL: "SET_IT"

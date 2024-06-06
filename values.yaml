@@ -1,3 +1,9 @@
+commonLabels:
+  chain_id: test-1
+  environment: test
+  network: consensus
+  type: full
+
 persistence:
   size: 30Gi
   # dataSource:
@@ -5,6 +11,10 @@ persistence:
   #   kind: VolumeSnapshot
   #   name: consensus-latest
 app:
+  otelAgent:
+    enabled: true
+    grafanaOtelSecret:
+      name: grafana-otel-token
   secret:
     name: consensus-1
   resources:
@@ -16,8 +26,19 @@ app:
       memory: 8Gi
   genesisURL: "http://10.44.143.2:26657/genesis"
   config:
+    clienttoml:
+      chain_id: "test-1"
+      node: "tcp://0.0.0.0:26657"
     configtoml:
       p2p:
         persistent_peers: "7aaed043cf5498032d4e7d0f146bc15f02bb476d@10.44.143.2:26656"
+      instrumentation:
+        prometheus: true
+        pyroscope_url: "http://pyroscope:4040"
+        pyroscope_tracing: true
+      tx_index:
+        indexer: "kv"
+      rpc:
+        max_subscriptions_per_client: 1000
 diagnosticMode:
   enabled: false
