@@ -11,10 +11,6 @@ persistence:
   #   kind: VolumeSnapshot
   #   name: consensus-latest
 app:
-  otelAgent:
-    enabled: true
-    grafanaOtelSecret:
-      name: grafana-otel-token
   secret:
     name: consensus-1
   resources:
@@ -24,7 +20,8 @@ app:
     limits:
       cpu: 2
       memory: 8Gi
-  genesisURL: "http://10.44.143.2:26657/genesis"
+  settings:
+    genesisURL: "http://10.44.143.2:26657/genesis"
   config:
     clienttoml:
       chain_id: "test-1"
@@ -40,5 +37,9 @@ app:
         indexer: "kv"
       rpc:
         max_subscriptions_per_client: 1000
+  otelAgent:
+    enabled: true
+    grafanaOtelSecret:
+      name: grafana-otel-token
 diagnosticMode:
   enabled: false

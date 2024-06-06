@@ -1,8 +1,3 @@
-{{- /*
-Copyright Broadcom, Inc. All Rights Reserved.
-SPDX-License-Identifier: APACHE-2.0
-*/}}
-
 {{- $replicaCount := int .Values.app.replicaCount }}
 {{- if and .Values.app.pdb.create (or (gt $replicaCount 1) .Values.app.autoscaling.enabled) }}
 apiVersion: {{ include "common.capabilities.policy.apiVersion" . }}

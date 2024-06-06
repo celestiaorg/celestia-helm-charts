@@ -15,8 +15,6 @@ app:
     enabled: true
     grafanaOtelSecret:
       name: grafana-otel-token
-  secret:
-    name: keys-consensus-1
   resources:
     requests:
       cpu: 6
@@ -33,7 +31,10 @@ app:
   startupProbe:
     enabled: true
     failureThreshold: 30
-  genesisURL: "https://raw.githubusercontent.com/celestiaorg/networks/master/mocha-4/genesis.json"
+  settings:
+    genesisURL: "https://raw.githubusercontent.com/celestiaorg/networks/master/mocha-4/genesis.json"
+    secret:
+      name: keys-consensus-1
   config:
     clienttoml:
       chain_id: "mocha-4"

@@ -106,283 +106,36 @@ app:
     ##   - myRegistryKeySecretName
     ##
     pullSecrets: []
-  ## @param app.replicaCount Number of app replicas to deploy
-  ##
-  # -- number of app replicas to deploy, 1 by default
-  replicaCount: 1
-  ## @param app.containerPorts.api app API container port
-  ## @param app.containerPorts.grpc app gRPC container port
-  ## @param app.containerPorts.p2p app P2P container port
-  ## @param app.containerPorts.rpc app RPC container port
-  ## @param app.containerPorts.prometheus app Prometheus container port
-  ## @param app.containerPorts.tracing app Tracing container port
-  ##
-  # -- container ports for the app
-  containerPorts:
-    # -- API container port, 1317 by default
-    api: 1317
-    # -- gRPC container port, 9090 by default
-    grpc: 9090
-    # -- P2P container port, 26656 by default
-    p2p: 26656
-    # -- RPC container port, 26657 by default
-    rpc: 26657
-    # -- Prometheus container port, 26660 by default
-    prometheus: 26660
-    # -- Tracing container port, 26661 by default
-    tracing: 26661
-  ## Configure extra options for app containers' liveness and readiness probes
-  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
-  ## @param app.livenessProbe.enabled Enable livenessProbe on app containers
-  ## @param app.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
-  ## @param app.livenessProbe.periodSeconds Period seconds for livenessProbe
-  ## @param app.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
-  ## @param app.livenessProbe.failureThreshold Failure threshold for livenessProbe
-  ## @param app.livenessProbe.successThreshold Success threshold for livenessProbe
-  ##
-  # -- liveness probe for the app
-  livenessProbe:
-    # -- enable liveness probe on app containers, false by default
-    enabled: false
-    # -- initial delay seconds for livenessProbe, 0 by default
-    initialDelaySeconds: 0
-    # -- period seconds for livenessProbe, 10 by default
-    periodSeconds: 10
-    # -- timeout seconds for livenessProbe, 1 by default
-    timeoutSeconds: 1
-    # -- failure threshold for livenessProbe, 3 by default
-    failureThreshold: 3
-    # -- success threshold for livenessProbe, 1 by default
-    successThreshold: 1
-  ## @param app.readinessProbe.enabled Enable readinessProbe on app containers
-  ## @param app.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
-  ## @param app.readinessProbe.periodSeconds Period seconds for readinessProbe
-  ## @param app.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
-  ## @param app.readinessProbe.failureThreshold Failure threshold for readinessProbe
-  ## @param app.readinessProbe.successThreshold Success threshold for readinessProbe
-  ##
-  readinessProbe:
-    # -- enable readiness probe on app containers, false by default
-    enabled: false
-    # -- initial delay seconds for readinessProbe, 0 by default
-    initialDelaySeconds: 0
-    # -- period seconds for readinessProbe, 10 by default
-    periodSeconds: 10
-    # -- timeout seconds for readinessProbe, 1 by default
-    timeoutSeconds: 1
-    # -- failure threshold for readinessProbe, 3 by default
-    failureThreshold: 3
-    # -- success threshold for readinessProbe, 1 by default
-    successThreshold: 1
-  ## @param app.startupProbe.enabled Enable startupProbe on app containers
-  ## @param app.startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
-  ## @param app.startupProbe.periodSeconds Period seconds for startupProbe
-  ## @param app.startupProbe.timeoutSeconds Timeout seconds for startupProbe
-  ## @param app.startupProbe.failureThreshold Failure threshold for startupProbe
-  ## @param app.startupProbe.successThreshold Success threshold for startupProbe
-  ##
-  # -- startup probe for the app  
-  startupProbe:
-    # -- enable startup probe on app containers, false by default
-    enabled: false
-    # -- initial delay seconds for startupProbe, 0 by default
-    initialDelaySeconds: 0
-    # -- period seconds for startupProbe, 10 by default
-    periodSeconds: 10
-    # -- timeout seconds for startupProbe, 1 by default
-    timeoutSeconds: 1
-    # -- failure threshold for startupProbe, 3 by default
-    successThreshold: 1
-  ## @param app.customLivenessProbe Custom livenessProbe that overrides the default one
-  ##
-  customLivenessProbe: {}
-  ## @param app.customReadinessProbe Custom readinessProbe that overrides the default one
-  ##
-  customReadinessProbe: {}
-  ## @param app.customStartupProbe Custom startupProbe that overrides the default one
-  ##
-  customStartupProbe: {}
-  ## app resource requests and limits
-  ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
-  ## @param app.resourcesPreset Set app container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if app.resources is set (app.resources is recommended for production).
-  ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
-  ##
-  # -- set app container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if app.resources is set (app.resources is recommended for production)
-  # -- more information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
-  resourcesPreset: "nano"
-  ## @param app.resources Set app container requests and limits for different resources like CPU or memory (essential for production workloads)
-  ## Example:
-  ## resources:
-  ##   requests:
-  ##     cpu: 2
-  ##     memory: 512Mi
-  ##   limits:
-  ##     cpu: 3
-  ##     memory: 1024Mi
-  ##
-  # -- resources for the app
-  resources:
-    # -- requests for the app
-    requests:
-      # -- cpu requests for the app, 2 by default
-      cpu: 2
-      # -- memory requests for the app, 8Gi by default
-      memory: 8Gi
-    # -- limits for the app
-    limits:
-      # -- cpu limits for the app, 2 by default
-      cpu: 2
-      # -- memory limits for the app, 8Gi by default
-      memory: 8Gi
-  ## Configure Pods Security Context
-  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
-  ## @param app.podSecurityContext.enabled Enable app pods' Security Context
-  ## @param app.podSecurityContext.fsGroupChangePolicy Set filesystem group change policy for app pods
-  ## @param app.podSecurityContext.sysctls Set kernel settings using the sysctl interface for app pods
-  ## @param app.podSecurityContext.supplementalGroups Set filesystem extra groups for app pods
-  ## @param app.podSecurityContext.fsGroup Set fsGroup in app pods' Security Context
-  ##
-  # -- pod security context for the app
-  podSecurityContext:
-    # -- enable pod security context for the app, true by default
-    enabled: true
-    # -- filesystem group change policy for app pods, Always by default
-    fsGroupChangePolicy: Always
-    # -- kernel settings using the sysctl interface for app pods, [] by default
-    sysctls: []
-    # -- filesystem extra groups for app pods, [] by default
-    supplementalGroups: []
-    # -- fsGroup in app pods' Security Context, 10001 by default
-    fsGroup: 10001
-  ## Configure Container Security Context
-  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
-  ## @param app.containerSecurityContext.enabled Enabled app container' Security Context
-  ## @param app.containerSecurityContext.seLinuxOptions [object,nullable] Set SELinux options in app container
-  ## @param app.containerSecurityContext.runAsUser Set runAsUser in app container' Security Context
-  ## @param app.containerSecurityContext.runAsNonRoot Set runAsNonRoot in app container' Security Context
-  ## @param app.containerSecurityContext.readOnlyRootFilesystem Set readOnlyRootFilesystem in app container' Security Context
-  ## @param app.containerSecurityContext.privileged Set privileged in app container' Security Context
-  ## @param app.containerSecurityContext.allowPrivilegeEscalation Set allowPrivilegeEscalation in app container' Security Context
-  ## @param app.containerSecurityContext.capabilities.drop List of capabilities to be dropped in app container
-  ## @param app.containerSecurityContext.seccompProfile.type Set seccomp profile in app container
-  ##
-  # -- container security context for the app
-  containerSecurityContext:
-    # -- enable container security context for the app, true by default
-    enabled: true
-    # -- SELinux options in app container, {} by default
-    seLinuxOptions: {}
-    # -- runAsUser in app container, 10001 by default
-    runAsUser: 10001
-    # -- runAsGroup in app container, 10001 by default
-    runAsGroup: 10001
-    # -- runAsNonRoot in app container, true by default
-    runAsNonRoot: true
-    # -- readOnlyRootFilesystem in app container, true by default
-    readOnlyRootFilesystem: true
-    # -- privileged in app container, false by default
-    privileged: false
-    # -- allowPrivilegeEscalation in app container, false by default  
-    allowPrivilegeEscalation: false
-    # -- capabilities to be dropped in app container, ["ALL"] by default
-    capabilities:
-      drop: ["ALL"]
-    # -- seccomp profile in app container, RuntimeDefault by default
-    seccompProfile:
-      type: "RuntimeDefault"
-
-  # -- otel agent configuration for the app
-  otelAgent:
-    # -- enable otel agent for the app, false by default
-    enabled: false
-    # -- image for the otel agent, ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.102.0 by default
-    image:
-      registry: ghcr.io
-      repository: open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib
-      tag: 0.102.0
-      digest: ""
-      pullPolicy: IfNotPresent
-    # -- resources for the otel agent
-    resources:
-      # -- requests for the otel agent
-      requests:
-        # -- cpu requests for the otel agent, 100m by default
-        cpu: 100m
-        # -- memory requests for the otel agent, 100Mi by default
-        memory: 100Mi
-      # -- limits for the otel agent
-      limits:
-        # -- cpu limits for the otel agent, 200m by default
-        cpu: 200m
-        # -- memory limits for the otel agent, 200Mi by default
-        memory: 200Mi
+  ## @param app.settings Settings for the celestia-app
+  settings:
+    ## @param app.settings.home Home directory for the celestia-app
+    ##
+    # -- home directory for the celestia-app, defaults to /home/celestia
+    home: "/home/celestia"
+    ## @param app.settings.genesisURL Genesis URL for the celestia-app
+    ##
+    # -- genesis URL for the celestia-app, it must be set
+    genesisURL: "SET_IT"
+    ## @param app.settings.secret Secret for the celestia-app
+    ##
     ## A secret must be available in the cluster with the following format:
     ## - name: <secret-name>
     ## - items:
-    ##     - key: token
-    ##       path: token
-    ##     - key: username
-    ##       path: username
-    # -- grafana otel secret for the app
-    grafanaOtelSecret:
-      # -- name of the grafana otel secret, SET_IT by default
+    ##     - key: node_key_json
+    ##       path: node_key.json
+    ##     - key: priv_validator_key_json
+    ##       path: priv_validator_key.json
+    secret:
+      # -- name of the secret, it must be set
       name: SET_IT
-    # -- config for the otel agent
-    config:
-      # -- extensions for the otel agent
-      extensions:
-        basicauth/otlp:
-          client_auth:
-            username: "${GRAFANA_OTEL_USERNAME}"
-            password: "${GRAFANA_OTEL_TOKEN}"
-      receivers:
-        otlp:
-          protocols:
-            grpc:
-              endpoint: "localhost:4317"
-            http:
-              endpoint: "localhost:4318"
-        prometheus:
-          config:
-            scrape_configs:
-              - job_name: "${JOB_NAME}"
-                scrape_interval: 10s
-                static_configs:
-                  - targets: ["localhost:26660"]
-      exporters:
-        otlphttp:
-          auth:
-            authenticator: basicauth/otlp
-          endpoint: https://otlp-gateway-prod-us-central-0.grafana.net/otlp
-        prometheus:
-          endpoint: "localhost:8889"
-      service:
-        extensions: [basicauth/otlp]
-        pipelines:
-          metrics:
-            receivers: [otlp, prometheus]
-            exporters: [otlphttp, prometheus]
-        telemetry:
-          metrics:
-            address: "localhost:8888"
-            level: basic
-          logs:
-            level: INFO
-
-  home: "/home/celestia"
-  genesisURL: "SET_IT"
-
-  ## A secret must be available in the cluster with the following format:
-  ## - name: <secret-name>
-  ## - items:
-  ##     - key: node_key_json
-  ##       path: node_key.json
-  ##     - key: priv_validator_key_json
-  ##       path: priv_validator_key.json
-  secret:
-    name: SET_IT
-
-  # -- configuration for the celestia-app
+  ## @param app.config Configuration for the celestia-app
+  ##
+  ## @param app.config.apptoml Configuration for the celestia-app app.toml
+  ##
+  ## @param app.config.clienttoml Configuration for the celestia-app client.toml
+  ##
+  ## @param app.config.configtoml Configuration for the celestia-app config.toml
+  ##
   config:
     # -- configuration for the celestia-app app.toml
     apptoml:
@@ -597,6 +350,269 @@ app:
           - mutex_duration
           - block_count
           - block_duration
+  ## @param app.otelAgent OTel agent configuration for the app
+  ##
+  otelAgent:
+    # -- enable otel agent for the app, false by default
+    enabled: false
+    # -- image for the otel agent, ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.102.0 by default
+    image:
+      registry: ghcr.io
+      repository: open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib
+      tag: 0.102.0
+      digest: ""
+      pullPolicy: IfNotPresent
+    # -- resources for the otel agent
+    resources:
+      # -- requests for the otel agent
+      requests:
+        # -- cpu requests for the otel agent, 100m by default
+        cpu: 100m
+        # -- memory requests for the otel agent, 100Mi by default
+        memory: 100Mi
+      # -- limits for the otel agent
+      limits:
+        # -- cpu limits for the otel agent, 200m by default
+        cpu: 200m
+        # -- memory limits for the otel agent, 200Mi by default
+        memory: 200Mi
+    ## A secret must be available in the cluster with the following format:
+    ## - name: <secret-name>
+    ## - items:
+    ##     - key: token
+    ##       path: token
+    ##     - key: username
+    ##       path: username
+    # -- grafana otel secret for the app
+    grafanaOtelSecret:
+      # -- name of the grafana otel secret, it must be set
+      name: SET_IT
+    ## @param app.otelAgent.config Configuration for the otel agent
+    ##
+    # -- config for the otel agent (See: https://opentelemetry.io/docs/collector/configuration/)
+    config:
+      extensions:
+        basicauth/otlp:
+          client_auth:
+            username: "${GRAFANA_OTEL_USERNAME}"
+            password: "${GRAFANA_OTEL_TOKEN}"
+      receivers:
+        otlp:
+          protocols:
+            grpc:
+              endpoint: "localhost:4317"
+            http:
+              endpoint: "localhost:4318"
+        prometheus:
+          config:
+            scrape_configs:
+              - job_name: "${JOB_NAME}"
+                scrape_interval: 10s
+                static_configs:
+                  - targets: ["localhost:26660"]
+      exporters:
+        otlphttp:
+          auth:
+            authenticator: basicauth/otlp
+          endpoint: https://otlp-gateway-prod-us-central-0.grafana.net/otlp
+        prometheus:
+          endpoint: "localhost:8889"
+      service:
+        extensions: [basicauth/otlp]
+        pipelines:
+          metrics:
+            receivers: [otlp, prometheus]
+            exporters: [otlphttp, prometheus]
+        telemetry:
+          metrics:
+            address: "localhost:8888"
+            level: basic
+          logs:
+            level: INFO
+  ## @param app.replicaCount Number of app replicas to deploy
+  ##
+  # -- number of app replicas to deploy, 1 by default
+  replicaCount: 1
+  ## @param app.containerPorts.api app API container port
+  ## @param app.containerPorts.grpc app gRPC container port
+  ## @param app.containerPorts.p2p app P2P container port
+  ## @param app.containerPorts.rpc app RPC container port
+  ## @param app.containerPorts.prometheus app Prometheus container port
+  ## @param app.containerPorts.tracing app Tracing container port
+  ##
+  # -- container ports for the app
+  containerPorts:
+    # -- API container port, 1317 by default
+    api: 1317
+    # -- gRPC container port, 9090 by default
+    grpc: 9090
+    # -- P2P container port, 26656 by default
+    p2p: 26656
+    # -- RPC container port, 26657 by default
+    rpc: 26657
+    # -- Prometheus container port, 26660 by default
+    prometheus: 26660
+    # -- Tracing container port, 26661 by default
+    tracing: 26661
+  ## Configure extra options for app containers' liveness and readiness probes
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
+  ## @param app.livenessProbe.enabled Enable livenessProbe on app containers
+  ## @param app.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
+  ## @param app.livenessProbe.periodSeconds Period seconds for livenessProbe
+  ## @param app.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
+  ## @param app.livenessProbe.failureThreshold Failure threshold for livenessProbe
+  ## @param app.livenessProbe.successThreshold Success threshold for livenessProbe
+  ##
+  # -- liveness probe for the app
+  livenessProbe:
+    # -- enable liveness probe on app containers, false by default
+    enabled: false
+    # -- initial delay seconds for livenessProbe, 0 by default
+    initialDelaySeconds: 0
+    # -- period seconds for livenessProbe, 10 by default
+    periodSeconds: 10
+    # -- timeout seconds for livenessProbe, 1 by default
+    timeoutSeconds: 1
+    # -- failure threshold for livenessProbe, 3 by default
+    failureThreshold: 3
+    # -- success threshold for livenessProbe, 1 by default
+    successThreshold: 1
+  ## @param app.readinessProbe.enabled Enable readinessProbe on app containers
+  ## @param app.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
+  ## @param app.readinessProbe.periodSeconds Period seconds for readinessProbe
+  ## @param app.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
+  ## @param app.readinessProbe.failureThreshold Failure threshold for readinessProbe
+  ## @param app.readinessProbe.successThreshold Success threshold for readinessProbe
+  ##
+  readinessProbe:
+    # -- enable readiness probe on app containers, false by default
+    enabled: false
+    # -- initial delay seconds for readinessProbe, 0 by default
+    initialDelaySeconds: 0
+    # -- period seconds for readinessProbe, 10 by default
+    periodSeconds: 10
+    # -- timeout seconds for readinessProbe, 1 by default
+    timeoutSeconds: 1
+    # -- failure threshold for readinessProbe, 3 by default
+    failureThreshold: 3
+    # -- success threshold for readinessProbe, 1 by default
+    successThreshold: 1
+  ## @param app.startupProbe.enabled Enable startupProbe on app containers
+  ## @param app.startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
+  ## @param app.startupProbe.periodSeconds Period seconds for startupProbe
+  ## @param app.startupProbe.timeoutSeconds Timeout seconds for startupProbe
+  ## @param app.startupProbe.failureThreshold Failure threshold for startupProbe
+  ## @param app.startupProbe.successThreshold Success threshold for startupProbe
+  ##
+  # -- startup probe for the app  
+  startupProbe:
+    # -- enable startup probe on app containers, false by default
+    enabled: false
+    # -- initial delay seconds for startupProbe, 0 by default
+    initialDelaySeconds: 0
+    # -- period seconds for startupProbe, 10 by default
+    periodSeconds: 10
+    # -- timeout seconds for startupProbe, 1 by default
+    timeoutSeconds: 1
+    # -- failure threshold for startupProbe, 3 by default
+    successThreshold: 1
+  ## @param app.customLivenessProbe Custom livenessProbe that overrides the default one
+  ##
+  customLivenessProbe: {}
+  ## @param app.customReadinessProbe Custom readinessProbe that overrides the default one
+  ##
+  customReadinessProbe: {}
+  ## @param app.customStartupProbe Custom startupProbe that overrides the default one
+  ##
+  customStartupProbe: {}
+  ## app resource requests and limits
+  ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  ## @param app.resourcesPreset Set app container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if app.resources is set (app.resources is recommended for production).
+  ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+  ##
+  # -- set app container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if app.resources is set (app.resources is recommended for production)
+  # -- more information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+  resourcesPreset: "nano"
+  ## @param app.resources Set app container requests and limits for different resources like CPU or memory (essential for production workloads)
+  ## Example:
+  ## resources:
+  ##   requests:
+  ##     cpu: 2
+  ##     memory: 512Mi
+  ##   limits:
+  ##     cpu: 3
+  ##     memory: 1024Mi
+  ##
+  # -- resources for the app
+  resources:
+    # -- requests for the app
+    requests:
+      # -- cpu requests for the app, 2 by default
+      cpu: 2
+      # -- memory requests for the app, 8Gi by default
+      memory: 8Gi
+    # -- limits for the app
+    limits:
+      # -- cpu limits for the app, 2 by default
+      cpu: 2
+      # -- memory limits for the app, 8Gi by default
+      memory: 8Gi
+  ## Configure Pods Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param app.podSecurityContext.enabled Enable app pods' Security Context
+  ## @param app.podSecurityContext.fsGroupChangePolicy Set filesystem group change policy for app pods
+  ## @param app.podSecurityContext.sysctls Set kernel settings using the sysctl interface for app pods
+  ## @param app.podSecurityContext.supplementalGroups Set filesystem extra groups for app pods
+  ## @param app.podSecurityContext.fsGroup Set fsGroup in app pods' Security Context
+  ##
+  # -- pod security context for the app
+  podSecurityContext:
+    # -- enable pod security context for the app, true by default
+    enabled: true
+    # -- filesystem group change policy for app pods, Always by default
+    fsGroupChangePolicy: Always
+    # -- kernel settings using the sysctl interface for app pods, [] by default
+    sysctls: []
+    # -- filesystem extra groups for app pods, [] by default
+    supplementalGroups: []
+    # -- fsGroup in app pods' Security Context, 10001 by default
+    fsGroup: 10001
+  ## Configure Container Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  ## @param app.containerSecurityContext.enabled Enabled app container' Security Context
+  ## @param app.containerSecurityContext.seLinuxOptions [object,nullable] Set SELinux options in app container
+  ## @param app.containerSecurityContext.runAsUser Set runAsUser in app container' Security Context
+  ## @param app.containerSecurityContext.runAsNonRoot Set runAsNonRoot in app container' Security Context
+  ## @param app.containerSecurityContext.readOnlyRootFilesystem Set readOnlyRootFilesystem in app container' Security Context
+  ## @param app.containerSecurityContext.privileged Set privileged in app container' Security Context
+  ## @param app.containerSecurityContext.allowPrivilegeEscalation Set allowPrivilegeEscalation in app container' Security Context
+  ## @param app.containerSecurityContext.capabilities.drop List of capabilities to be dropped in app container
+  ## @param app.containerSecurityContext.seccompProfile.type Set seccomp profile in app container
+  ##
+  # -- container security context for the app
+  containerSecurityContext:
+    # -- enable container security context for the app, true by default
+    enabled: true
+    # -- SELinux options in app container, {} by default
+    seLinuxOptions: {}
+    # -- runAsUser in app container, 10001 by default
+    runAsUser: 10001
+    # -- runAsGroup in app container, 10001 by default
+    runAsGroup: 10001
+    # -- runAsNonRoot in app container, true by default
+    runAsNonRoot: true
+    # -- readOnlyRootFilesystem in app container, true by default
+    readOnlyRootFilesystem: true
+    # -- privileged in app container, false by default
+    privileged: false
+    # -- allowPrivilegeEscalation in app container, false by default  
+    allowPrivilegeEscalation: false
+    # -- capabilities to be dropped in app container, ["ALL"] by default
+    capabilities:
+      drop: ["ALL"]
+    # -- seccomp profile in app container, RuntimeDefault by default
+    seccompProfile:
+      type: "RuntimeDefault"
 
   ## @param app.existingConfigmap The name of an existing ConfigMap with your custom configuration for app
   ##
@@ -766,20 +782,6 @@ app:
     create: false
     minAvailable: 1
     maxUnavailable: ""
-  ## Autoscaling configuration
-  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
-  ## @param app.autoscaling.enabled Enable autoscaling for app
-  ## @param app.autoscaling.minReplicas Minimum number of app replicas
-  ## @param app.autoscaling.maxReplicas Maximum number of app replicas
-  ## @param app.autoscaling.targetCPU Target CPU utilization percentage
-  ## @param app.autoscaling.targetMemory Target Memory utilization percentage
-  ##
-  autoscaling:
-    enabled: false
-    minReplicas: ""
-    maxReplicas: ""
-    targetCPU: ""
-    targetMemory: ""
 
   # TODO: Remove when not needed in the end
   # TODO: If you add here something remember to add it to:_helpers.tpl (define "app.imagePullSecrets") and NOTES.txt ({{- include "common.warnings.rollingTag" .Values.%%OTHER_OBJECT_BLOCK%%.image }})
@@ -999,7 +1001,7 @@ persistence:
   # -- enable persistence, true by default
   enabled: true
   ## @param persistence.mountPath Path to mount the volume at.
-  ## Note: This value is overridden by 'Values.app.home' in the stateful set.
+  ## Note: This value is overridden by 'Values.app.settings.home' in the stateful set.
   ##
   mountPath: /bitnami/app/data
   ## @param persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services

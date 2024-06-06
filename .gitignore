@@ -1,2 +1,6 @@
 .idea
 .vscode
+
+### Helm ###
+# Chart dependencies
+**/charts/*.tgz

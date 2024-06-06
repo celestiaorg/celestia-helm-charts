@@ -1,8 +1,3 @@
-{{- /*
-Copyright Broadcom, Inc. All Rights Reserved.
-SPDX-License-Identifier: APACHE-2.0
-*/}}
-
 apiVersion: {{ include "common.capabilities.statefulset.apiVersion" . }}
 kind: StatefulSet
 metadata:
@@ -15,9 +10,7 @@ metadata:
   annotations: {{- include "common.tplvalues.render" ( dict "value" $annotations "context" $ ) | nindent 4 }}
   {{- end }}
 spec:
-  {{- if not .Values.app.autoscaling.enabled }}
   replicas: {{ .Values.app.replicaCount }}
-  {{- end }}
   podManagementPolicy: {{ .Values.app.podManagementPolicy | quote }}
   {{- $podLabels := include "common.tplvalues.merge" (dict "values" (list .Values.app.podLabels .Values.commonLabels) "context" .) }}
   selector:
@@ -76,7 +69,7 @@ spec:
           image: {{ include "app.volumePermissions.image" . }}
           imagePullPolicy: {{ .Values.volumePermissions.image.pullPolicy | quote }}
           command:
-            - %%command%%
+            - chown -R {{ .Values.securityContext.runAsUser }}:{{ .Values.securityContext.fsGroup }} {{ .Values.app.settings.home }}/data
           {{- if .Values.volumePermissions.containerSecurityContext.enabled }}
           securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.volumePermissions.containerSecurityContext "context" $) | nindent 12 }}
           {{- end }}
@@ -87,7 +80,7 @@ spec:
           {{- end }}
           volumeMounts:
             - name: data
-              mountPath: {{ .Values.app.home }}/data
+              mountPath: {{ .Values.app.settings.home }}/data
               {{- if .Values.persistence.subPath }}
               subPath: {{ .Values.persistence.subPath }}
               {{- end }}
@@ -97,7 +90,7 @@ spec:
           imagePullPolicy: IfNotPresent
           env:
             - name: CELESTIA_HOME
-              value: {{ .Values.app.home }}
+              value: {{ .Values.app.settings.home }}
           command:
             - sh
             - -c
@@ -115,7 +108,7 @@ spec:
               fi
           volumeMounts:
             - name: data
-              mountPath: {{ .Values.app.home }}/data
+              mountPath: {{ .Values.app.settings.home }}/data
         - name: download-genesis
           image: busybox
           imagePullPolicy: IfNotPresent
@@ -124,7 +117,7 @@ spec:
             - -c
             - |
               mkdir -p /genesis
-              wget -O /genesis/genesis.json {{ .Values.app.genesisURL }}
+              wget -O /genesis/genesis.json {{ .Values.app.settings.genesisURL }}
               if ! command -v jq &> /dev/null; then
                 echo "jq not found, installing..."
                 wget -O /bin/jq https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64
@@ -159,7 +152,7 @@ spec:
           {{- end }}
           env:
             - name: CELESTIA_HOME
-              value: {{ .Values.app.home }}
+              value: {{ .Values.app.settings.home }}
             {{- if .Values.app.extraEnvVars }}
             {{- include "common.tplvalues.render" (dict "value" .Values.app.extraEnvVars "context" $) | nindent 12 }}
             {{- end }}
@@ -230,33 +223,30 @@ spec:
           {{- end }}
           volumeMounts:
             - name: data
-              mountPath: {{ .Values.app.home }}/data
+              mountPath: {{ .Values.app.settings.home }}/data
               {{- if .Values.persistence.subPath }}
               subPath: {{ .Values.persistence.subPath }}
               {{- end }}
               readOnly: false
-            - name: empty-dir
-              mountPath: /tmp
-              subPath: tmp-dir
             - name: node-key
-              mountPath: /home/celestia/config/node_key.json
+              mountPath: {{ .Values.app.settings.home }}/config/node_key.json
               subPath: node_key.json
             - name: validator-key
-              mountPath: /home/celestia/config/priv_validator_key.json
+              mountPath: {{ .Values.app.settings.home }}/config/priv_validator_key.json
               subPath: priv_validator_key.json
             - name: genesis
-              mountPath: /home/celestia/config/genesis.json
+              mountPath: {{ .Values.app.settings.home }}/config/genesis.json
               subPath: genesis.json
-            - name: config-dir
-              mountPath: /home/celestia/config
-            - name: config
-              mountPath: /home/celestia/config/config.toml
-              subPath: config.toml
-            - name: config
-              mountPath: /home/celestia/config/app.toml
+            - name: config-dir # This is needed so that the process as permissions to create files in the config directory
+              mountPath: {{ .Values.app.settings.home }}/config
+            - name: apptoml
+              mountPath: {{ .Values.app.settings.home }}/config/app.toml
               subPath: app.toml
-            - name: config
-              mountPath: /home/celestia/config/client.toml
+            - name: configtoml
+              mountPath: {{ .Values.app.settings.home }}/config/config.toml
+              subPath: config.toml
+            - name: clienttoml
+              mountPath: {{ .Values.app.settings.home }}/config/client.toml
               subPath: client.toml
           {{- if .Values.app.extraVolumeMounts }}
           {{- include "common.tplvalues.render" (dict "value" .Values.app.extraVolumeMounts "context" $) | nindent 12 }}
@@ -298,18 +288,16 @@ spec:
         {{- include "common.tplvalues.render" ( dict "value" .Values.app.sidecars "context" $) | nindent 8 }}
         {{- end }}
       volumes:
-        - name: empty-dir
-          emptyDir: {}
         - name: node-key
           secret:
-            secretName: {{ .Values.app.secret.name }}
+            secretName: {{ .Values.app.settings.secret.name }}
             items:
               - key: node_key_json
                 path: node_key.json
             defaultMode: 384
         - name: validator-key
           secret:
-            secretName: {{ .Values.app.secret.name }}
+            secretName: {{ .Values.app.settings.secret.name }}
             items:
               - key: priv_validator_key_json
                 path: priv_validator_key.json
@@ -318,9 +306,15 @@ spec:
           emptyDir: {}
         - name: config-dir
           emptyDir: {}
-        - name: config
+        - name: apptoml
           configMap:
-            name: {{ template "common.names.fullname" . }}
+            name: {{ template "common.names.fullname" . }}-apptoml
+        - name: clienttoml
+          configMap:
+            name: {{ template "common.names.fullname" . }}-clienttoml
+        - name: configtoml
+          configMap:
+            name: {{ template "common.names.fullname" . }}-configtoml
         - name: otel-agent-config
           configMap:
             name: {{ template "common.names.fullname" . }}-otel-agent

@@ -3,6 +3,7 @@
 # Function to convert TOML to templated TOML
 convert_toml_to_template() {
   local toml_file=$1
+  local node_type=$2
   local toml_output
   local template_output
 
@@ -28,54 +29,55 @@ convert_toml_to_template() {
   current_section=""
   file_base_name=$(basename "$toml_file" .toml)toml
   while IFS= read -r line; do
-    if [[ $line =~ ^([a-zA-Z0-9_-]+)\ =\ \"(.+)\"$ ]]; then
+    leading_spaces=$(echo "$line" | sed -e 's/\(^[[:space:]]*\).*/\1/')
+    if [[ $line =~ ^[[:space:]]*([a-zA-Z0-9_-]+)\ =\ \"(.+)\"$ ]]; then
       key="${BASH_REMATCH[1]}"
       key_replaced="${key//-/_}"
       current_section_replaced="${current_section//-/_}"
       if [ -n "$current_section" ]; then
-        template_output+="$key = \"{{ .Values.app.config.${file_base_name}.${current_section_replaced}.$key_replaced }}\"\n"
+        template_output+="${leading_spaces}$key = \"{{ .Values.${node_type}.config.${file_base_name}.${current_section_replaced}.$key_replaced }}\"\n"
       else
-        template_output+="$key = \"{{ .Values.app.config.${file_base_name}.$key_replaced }}\"\n"
+        template_output+="${leading_spaces}$key = \"{{ .Values.${node_type}.config.${file_base_name}.$key_replaced }}\"\n"
       fi
-    elif [[ $line =~ ^([a-zA-Z0-9_-]+)\ =\ \[(.+)\]$ ]]; then
+    elif [[ $line =~ ^[[:space:]]*([a-zA-Z0-9_-]+)\ =\ \[(.+)\]$ ]]; then
       key="${BASH_REMATCH[1]}"
       key_replaced="${key//-/_}"
       current_section_replaced="${current_section//-/_}"
       if [ -n "$current_section" ]; then
-        template_output+="$key = [{{ range \$index, \$element := .Values.app.config.${file_base_name}.${current_section_replaced}.$key_replaced }}{{ if \$index }}, {{ end }}\"{{ \$element }}\"{{ end }}]\n"
+        template_output+="${leading_spaces}$key = [{{ range \$index, \$element := .Values.${node_type}.config.${file_base_name}.${current_section_replaced}.$key_replaced }}{{ if \$index }}, {{ end }}\"{{ \$element }}\"{{ end }}]\n"
       else
-        template_output+="$key = [{{ range \$index, \$element := .Values.app.config.${file_base_name}.$key_replaced }}{{ if \$index }}, {{ end }}\"{{ \$element }}\"{{ end }}]\n"
+        template_output+="${leading_spaces}$key = [{{ range \$index, \$element := .Values.${node_type}.config.${file_base_name}.$key_replaced }}{{ if \$index }}, {{ end }}\"{{ \$element }}\"{{ end }}]\n"
       fi
-    elif [[ $line =~ ^([a-zA-Z0-9_-]+)\ =\ (.+)$ ]]; then
+    elif [[ $line =~ ^[[:space:]]*([a-zA-Z0-9_-]+)\ =\ (.+)$ ]]; then
       key="${BASH_REMATCH[1]}"
       value="${BASH_REMATCH[2]}"
       key_replaced="${key//-/_}"
       current_section_replaced="${current_section//-/_}"
       if [[ $value =~ ^\".*\"$ ]]; then
         if [ -n "$current_section" ]; then
-          template_output+="$key = \"{{ .Values.app.config.${file_base_name}.${current_section_replaced}.$key_replaced }}\"\n"
+          template_output+="${leading_spaces}$key = \"{{ .Values.${node_type}.config.${file_base_name}.${current_section_replaced}.$key_replaced }}\"\n"
         else
-          template_output+="$key = \"{{ .Values.app.config.${file_base_name}.$key_replaced }}\"\n"
+          template_output+="${leading_spaces}$key = \"{{ .Values.${node_type}.config.${file_base_name}.$key_replaced }}\"\n"
         fi
       else
         if [[ $value =~ ^[0-9]+$ ]]; then
           if [ -n "$current_section" ]; then
-            template_output+="$key = {{ printf \"%.0f\" .Values.app.config.${file_base_name}.${current_section_replaced}.$key_replaced }}\n"
+            template_output+="${leading_spaces}$key = {{ printf \"%.0f\" .Values.${node_type}.config.${file_base_name}.${current_section_replaced}.$key_replaced }}\n"
           else
-            template_output+="$key = {{ printf \"%.0f\" .Values.app.config.${file_base_name}.$key_replaced }}\n"
+            template_output+="${leading_spaces}$key = {{ printf \"%.0f\" .Values.${node_type}.config.${file_base_name}.$key_replaced }}\n"
           fi
         else
           if [ -n "$current_section" ]; then
-            template_output+="$key = {{ .Values.app.config.${file_base_name}.${current_section_replaced}.$key_replaced }}\n"
+            template_output+="${leading_spaces}$key = {{ .Values.${node_type}.config.${file_base_name}.${current_section_replaced}.$key_replaced }}\n"
           else
-            template_output+="$key = {{ .Values.app.config.${file_base_name}.$key_replaced }}\n"
+            template_output+="${leading_spaces}$key = {{ .Values.${node_type}.config.${file_base_name}.$key_replaced }}\n"
           fi
         fi
       fi
-    elif [[ $line =~ ^\[([a-zA-Z0-9_.-]+)\]$ ]]; then
+    elif [[ $line =~ ^[[:space:]]*\[([a-zA-Z0-9_.-]+)\]$ ]]; then
       current_section="${BASH_REMATCH[1]}"
       current_section_replaced="${current_section//-/_}"
-      template_output+="[${current_section_replaced}]\n"
+      template_output+="${leading_spaces}[${current_section_replaced}]\n"
     else
       template_output+="$line\n"
     fi
@@ -86,10 +88,10 @@ convert_toml_to_template() {
 }
 
 # Check if the correct number of arguments is provided
-if [ "$#" -ne 1 ]; then
-  echo "Usage: $0 <path_to_toml_file>"
+if [ "$#" -ne 2 ]; then
+  echo "Usage: $0 <path_to_toml_file> <node_type>" 
   exit 1
 fi
 
 # Call the function with the provided TOML file
-convert_toml_to_template "$1"
+convert_toml_to_template "$1" "$2"

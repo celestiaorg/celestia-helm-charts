@@ -1,11 +1,7 @@
-{{- /*
-Copyright Broadcom, Inc. All Rights Reserved.
-SPDX-License-Identifier: APACHE-2.0
-*/}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ template "common.names.fullname" . }}
+  name: {{ template "common.names.fullname" . }}-apptoml
   namespace: {{ include "common.names.namespace" . | quote }}
   labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
     app.kubernetes.io/component: app
@@ -76,12 +72,38 @@ data:
     output-metadata = "{{ .Values.app.config.apptoml.streamers.file.output_metadata }}"
     stop-node-on-error = "{{ .Values.app.config.apptoml.streamers.file.stop_node_on_error }}"
     fsync = "{{ .Values.app.config.apptoml.streamers.file.fsync }}"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "common.names.fullname" . }}-clienttoml
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: app
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+data:
   client.toml: |
     chain-id = "{{ .Values.app.config.clienttoml.chain_id }}"
     keyring-backend = "{{ .Values.app.config.clienttoml.keyring_backend }}"
     output = "{{ .Values.app.config.clienttoml.output }}"
     node = "{{ .Values.app.config.clienttoml.node }}"
     broadcast-mode = "{{ .Values.app.config.clienttoml.broadcast_mode }}"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "common.names.fullname" . }}-configtoml
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: app
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+data:
   config.toml: |
     proxy_app = "{{ .Values.app.config.configtoml.proxy_app }}"
     moniker = "{{ .Values.app.config.configtoml.moniker }}"
@@ -199,7 +221,6 @@ data:
     pyroscope_url = "{{ .Values.app.config.configtoml.instrumentation.pyroscope_url }}"
     pyroscope_trace = {{ .Values.app.config.configtoml.instrumentation.pyroscope_trace }}
     pyroscope_profile_types = [{{ range $index, $element := .Values.app.config.configtoml.instrumentation.pyroscope_profile_types }}{{ if $index }}, {{ end }}"{{ $element }}"{{ end }}]
-
 {{- if .Values.app.otelAgent.enabled }}
 ---
 apiVersion: v1

@@ -1,6 +1,3 @@
-# Copyright Broadcom, Inc. All Rights Reserved.
-# SPDX-License-Identifier: APACHE-2.0
-
 annotations:
   category: celestia
   licenses: Apache-2.0
@@ -14,7 +11,7 @@ dependencies:
   version: 2.x.x
 description: Celestia App
 home: https://celestia.org
-icon: https://celestia.org/img/celestia-logo.png
+icon: https://celestia.org/static/celestia-logo-29451ae35d3bb72cc4b0f17712d44c3a.svg
 keywords:
   - celestia
   - celestia-app

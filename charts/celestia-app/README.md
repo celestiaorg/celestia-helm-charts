@@ -29,11 +29,6 @@ Celestia App
 | app.affinity | object | `{}` |  |
 | app.args | list | `[]` |  |
 | app.automountServiceAccountToken | bool | `false` | mount service account token in app pods |
-| app.autoscaling.enabled | bool | `false` |  |
-| app.autoscaling.maxReplicas | string | `""` |  |
-| app.autoscaling.minReplicas | string | `""` |  |
-| app.autoscaling.targetCPU | string | `""` |  |
-| app.autoscaling.targetMemory | string | `""` |  |
 | app.command | list | `["celestia-appd","start","--home","$(CELESTIA_HOME)"]` | command for the celestia-app  |
 | app.config.apptoml.api.address | string | `"tcp://0.0.0.0:1317"` |  |
 | app.config.apptoml.api.enable | bool | `false` |  |
@@ -248,8 +243,6 @@ Celestia App
 | app.extraEnvVarsSecret | string | `""` |  |
 | app.extraVolumeMounts | list | `[]` |  |
 | app.extraVolumes | list | `[]` |  |
-| app.genesisURL | string | `"SET_IT"` |  |
-| app.home | string | `"/home/celestia"` |  |
 | app.hostAliases | list | `[]` |  |
 | app.image | object | `{"digest":"","pullPolicy":"IfNotPresent","pullSecrets":[],"registry":"ghcr.io","repository":"celestiaorg/celestia-app","tag":"v1.9.0"}` | image parameters for the image |
 | app.image.pullPolicy | string | `"IfNotPresent"` | pull policy for the image, IfNotPresent by default |
@@ -269,11 +262,10 @@ Celestia App
 | app.nodeAffinityPreset.type | string | `""` |  |
 | app.nodeAffinityPreset.values | list | `[]` |  |
 | app.nodeSelector | object | `{}` |  |
-| app.otelAgent.config | object | `{"exporters":{"otlphttp":{"auth":{"authenticator":"basicauth/otlp"},"endpoint":"https://otlp-gateway-prod-us-central-0.grafana.net/otlp"},"prometheus":{"endpoint":"localhost:8889"}},"extensions":{"basicauth/otlp":{"client_auth":{"password":"${GRAFANA_OTEL_TOKEN}","username":"${GRAFANA_OTEL_USERNAME}"}}},"receivers":{"otlp":{"protocols":{"grpc":{"endpoint":"localhost:4317"},"http":{"endpoint":"localhost:4318"}}},"prometheus":{"config":{"scrape_configs":[{"job_name":"${JOB_NAME}","scrape_interval":"10s","static_configs":[{"targets":["localhost:26660"]}]}]}}},"service":{"extensions":["basicauth/otlp"],"pipelines":{"metrics":{"exporters":["otlphttp","prometheus"],"receivers":["otlp","prometheus"]}},"telemetry":{"logs":{"level":"INFO"},"metrics":{"address":"localhost:8888","level":"basic"}}}}` | config for the otel agent |
-| app.otelAgent.config.extensions | object | `{"basicauth/otlp":{"client_auth":{"password":"${GRAFANA_OTEL_TOKEN}","username":"${GRAFANA_OTEL_USERNAME}"}}}` | extensions for the otel agent |
+| app.otelAgent.config | object | `{"exporters":{"otlphttp":{"auth":{"authenticator":"basicauth/otlp"},"endpoint":"https://otlp-gateway-prod-us-central-0.grafana.net/otlp"},"prometheus":{"endpoint":"localhost:8889"}},"extensions":{"basicauth/otlp":{"client_auth":{"password":"${GRAFANA_OTEL_TOKEN}","username":"${GRAFANA_OTEL_USERNAME}"}}},"receivers":{"otlp":{"protocols":{"grpc":{"endpoint":"localhost:4317"},"http":{"endpoint":"localhost:4318"}}},"prometheus":{"config":{"scrape_configs":[{"job_name":"${JOB_NAME}","scrape_interval":"10s","static_configs":[{"targets":["localhost:26660"]}]}]}}},"service":{"extensions":["basicauth/otlp"],"pipelines":{"metrics":{"exporters":["otlphttp","prometheus"],"receivers":["otlp","prometheus"]}},"telemetry":{"logs":{"level":"INFO"},"metrics":{"address":"localhost:8888","level":"basic"}}}}` | config for the otel agent (See: https://opentelemetry.io/docs/collector/configuration/) |
 | app.otelAgent.enabled | bool | `false` | enable otel agent for the app, false by default |
 | app.otelAgent.grafanaOtelSecret | object | `{"name":"SET_IT"}` | grafana otel secret for the app |
-| app.otelAgent.grafanaOtelSecret.name | string | `"SET_IT"` | name of the grafana otel secret, SET_IT by default |
+| app.otelAgent.grafanaOtelSecret.name | string | `"SET_IT"` | name of the grafana otel secret, it must be set |
 | app.otelAgent.image | object | `{"digest":"","pullPolicy":"IfNotPresent","registry":"ghcr.io","repository":"open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib","tag":"0.102.0"}` | image for the otel agent, ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.102.0 by default |
 | app.otelAgent.resources | object | `{"limits":{"cpu":"200m","memory":"200Mi"},"requests":{"cpu":"100m","memory":"100Mi"}}` | resources for the otel agent |
 | app.otelAgent.resources.limits | object | `{"cpu":"200m","memory":"200Mi"}` | limits for the otel agent |
@@ -312,7 +304,9 @@ Celestia App
 | app.resources.requests.memory | string | `"8Gi"` | memory requests for the app, 8Gi by default |
 | app.resourcesPreset | string | `"nano"` | more information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15 |
 | app.schedulerName | string | `""` |  |
-| app.secret.name | string | `"SET_IT"` |  |
+| app.settings.genesisURL | string | `"SET_IT"` | genesis URL for the celestia-app, it must be set |
+| app.settings.home | string | `"/home/celestia"` | home directory for the celestia-app, defaults to /home/celestia |
+| app.settings.secret.name | string | `"SET_IT"` | name of the secret, it must be set |
 | app.sidecars | list | `[]` |  |
 | app.startupProbe | object | `{"enabled":false,"initialDelaySeconds":0,"periodSeconds":10,"successThreshold":1,"timeoutSeconds":1}` | startup probe for the app   |
 | app.startupProbe.enabled | bool | `false` | enable startup probe on app containers, false by default |
