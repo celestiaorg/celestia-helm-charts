@@ -83,15 +83,20 @@ app:
   ## @param app.image.pullPolicy celestia-app image pull policy
   ## @param app.image.pullSecrets celestia-app image pull secrets
   ##
+  # -- image parameters for the image
   image:
+    # -- registry for the image, GitHub Container Registry by default
     registry: ghcr.io
+    # -- repository for the image, celestiaorg/celestia-app by default
     repository: celestiaorg/celestia-app
+    # -- tag for the image, v1.9.0 by default
     tag: v1.9.0
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
     ## ref: https://kubernetes.io/docs/concepts/containers/images/#pre-pulled-images
     ##
+    # -- pull policy for the image, IfNotPresent by default
     pullPolicy: IfNotPresent
     ## Optionally specify an array of imagePullSecrets.
     ## Secrets must be manually created in the namespace.
@@ -103,6 +108,7 @@ app:
     pullSecrets: []
   ## @param app.replicaCount Number of app replicas to deploy
   ##
+  # -- number of app replicas to deploy, 1 by default
   replicaCount: 1
   ## @param app.containerPorts.api app API container port
   ## @param app.containerPorts.grpc app gRPC container port
@@ -111,12 +117,19 @@ app:
   ## @param app.containerPorts.prometheus app Prometheus container port
   ## @param app.containerPorts.tracing app Tracing container port
   ##
+  # -- container ports for the app
   containerPorts:
+    # -- API container port, 1317 by default
     api: 1317
+    # -- gRPC container port, 9090 by default
     grpc: 9090
+    # -- P2P container port, 26656 by default
     p2p: 26656
+    # -- RPC container port, 26657 by default
     rpc: 26657
+    # -- Prometheus container port, 26660 by default
     prometheus: 26660
+    # -- Tracing container port, 26661 by default
     tracing: 26661
   ## Configure extra options for app containers' liveness and readiness probes
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
@@ -127,12 +140,19 @@ app:
   ## @param app.livenessProbe.failureThreshold Failure threshold for livenessProbe
   ## @param app.livenessProbe.successThreshold Success threshold for livenessProbe
   ##
+  # -- liveness probe for the app
   livenessProbe:
+    # -- enable liveness probe on app containers, false by default
     enabled: false
+    # -- initial delay seconds for livenessProbe, 0 by default
     initialDelaySeconds: 0
+    # -- period seconds for livenessProbe, 10 by default
     periodSeconds: 10
+    # -- timeout seconds for livenessProbe, 1 by default
     timeoutSeconds: 1
+    # -- failure threshold for livenessProbe, 3 by default
     failureThreshold: 3
+    # -- success threshold for livenessProbe, 1 by default
     successThreshold: 1
   ## @param app.readinessProbe.enabled Enable readinessProbe on app containers
   ## @param app.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
@@ -142,11 +162,17 @@ app:
   ## @param app.readinessProbe.successThreshold Success threshold for readinessProbe
   ##
   readinessProbe:
+    # -- enable readiness probe on app containers, false by default
     enabled: false
+    # -- initial delay seconds for readinessProbe, 0 by default
     initialDelaySeconds: 0
+    # -- period seconds for readinessProbe, 10 by default
     periodSeconds: 10
+    # -- timeout seconds for readinessProbe, 1 by default
     timeoutSeconds: 1
+    # -- failure threshold for readinessProbe, 3 by default
     failureThreshold: 3
+    # -- success threshold for readinessProbe, 1 by default
     successThreshold: 1
   ## @param app.startupProbe.enabled Enable startupProbe on app containers
   ## @param app.startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
@@ -155,12 +181,17 @@ app:
   ## @param app.startupProbe.failureThreshold Failure threshold for startupProbe
   ## @param app.startupProbe.successThreshold Success threshold for startupProbe
   ##
+  # -- startup probe for the app  
   startupProbe:
+    # -- enable startup probe on app containers, false by default
     enabled: false
+    # -- initial delay seconds for startupProbe, 0 by default
     initialDelaySeconds: 0
+    # -- period seconds for startupProbe, 10 by default
     periodSeconds: 10
+    # -- timeout seconds for startupProbe, 1 by default
     timeoutSeconds: 1
-    failureThreshold: 3
+    # -- failure threshold for startupProbe, 3 by default
     successThreshold: 1
   ## @param app.customLivenessProbe Custom livenessProbe that overrides the default one
   ##
@@ -176,6 +207,8 @@ app:
   ## @param app.resourcesPreset Set app container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if app.resources is set (app.resources is recommended for production).
   ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
   ##
+  # -- set app container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if app.resources is set (app.resources is recommended for production)
+  # -- more information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
   resourcesPreset: "nano"
   ## @param app.resources Set app container requests and limits for different resources like CPU or memory (essential for production workloads)
   ## Example:
@@ -187,12 +220,19 @@ app:
   ##     cpu: 3
   ##     memory: 1024Mi
   ##
+  # -- resources for the app
   resources:
+    # -- requests for the app
     requests:
+      # -- cpu requests for the app, 2 by default
       cpu: 2
+      # -- memory requests for the app, 8Gi by default
       memory: 8Gi
+    # -- limits for the app
     limits:
+      # -- cpu limits for the app, 2 by default
       cpu: 2
+      # -- memory limits for the app, 8Gi by default
       memory: 8Gi
   ## Configure Pods Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
@@ -202,11 +242,17 @@ app:
   ## @param app.podSecurityContext.supplementalGroups Set filesystem extra groups for app pods
   ## @param app.podSecurityContext.fsGroup Set fsGroup in app pods' Security Context
   ##
+  # -- pod security context for the app
   podSecurityContext:
+    # -- enable pod security context for the app, true by default
     enabled: true
+    # -- filesystem group change policy for app pods, Always by default
     fsGroupChangePolicy: Always
+    # -- kernel settings using the sysctl interface for app pods, [] by default
     sysctls: []
+    # -- filesystem extra groups for app pods, [] by default
     supplementalGroups: []
+    # -- fsGroup in app pods' Security Context, 10001 by default
     fsGroup: 10001
   ## Configure Container Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
@@ -220,34 +266,55 @@ app:
   ## @param app.containerSecurityContext.capabilities.drop List of capabilities to be dropped in app container
   ## @param app.containerSecurityContext.seccompProfile.type Set seccomp profile in app container
   ##
+  # -- container security context for the app
   containerSecurityContext:
+    # -- enable container security context for the app, true by default
     enabled: true
+    # -- SELinux options in app container, {} by default
     seLinuxOptions: {}
+    # -- runAsUser in app container, 10001 by default
     runAsUser: 10001
+    # -- runAsGroup in app container, 10001 by default
     runAsGroup: 10001
+    # -- runAsNonRoot in app container, true by default
     runAsNonRoot: true
+    # -- readOnlyRootFilesystem in app container, true by default
     readOnlyRootFilesystem: true
+    # -- privileged in app container, false by default
     privileged: false
+    # -- allowPrivilegeEscalation in app container, false by default  
     allowPrivilegeEscalation: false
+    # -- capabilities to be dropped in app container, ["ALL"] by default
     capabilities:
       drop: ["ALL"]
+    # -- seccomp profile in app container, RuntimeDefault by default
     seccompProfile:
       type: "RuntimeDefault"
 
+  # -- otel agent configuration for the app
   otelAgent:
+    # -- enable otel agent for the app, false by default
     enabled: false
+    # -- image for the otel agent, ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.102.0 by default
     image:
       registry: ghcr.io
       repository: open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib
       tag: 0.102.0
       digest: ""
       pullPolicy: IfNotPresent
+    # -- resources for the otel agent
     resources:
+      # -- requests for the otel agent
       requests:
+        # -- cpu requests for the otel agent, 100m by default
         cpu: 100m
+        # -- memory requests for the otel agent, 100Mi by default
         memory: 100Mi
+      # -- limits for the otel agent
       limits:
+        # -- cpu limits for the otel agent, 200m by default
         cpu: 200m
+        # -- memory limits for the otel agent, 200Mi by default
         memory: 200Mi
     ## A secret must be available in the cluster with the following format:
     ## - name: <secret-name>
@@ -256,9 +323,13 @@ app:
     ##       path: token
     ##     - key: username
     ##       path: username
+    # -- grafana otel secret for the app
     grafanaOtelSecret:
+      # -- name of the grafana otel secret, SET_IT by default
       name: SET_IT
+    # -- config for the otel agent
     config:
+      # -- extensions for the otel agent
       extensions:
         basicauth/otlp:
           client_auth:
@@ -311,7 +382,9 @@ app:
   secret:
     name: SET_IT
 
+  # -- configuration for the celestia-app
   config:
+    # -- configuration for the celestia-app app.toml
     apptoml:
       minimum_gas_prices: 0.002utia
       pruning: default
@@ -376,12 +449,14 @@ app:
           output_metadata: "true"
           stop_node_on_error: "true"
           fsync: "false"
+    # -- configuration for the celestia-app client.toml
     clienttoml:
       chain_id: celestia
       keyring_backend: test
       output: text
       node: tcp://localhost:26657
       broadcast_mode: sync
+    # -- configuration for the celestia-app config.toml
     configtoml:
       proxy_app: tcp://127.0.0.1:26658
       moniker: app
@@ -528,7 +603,9 @@ app:
   existingConfigmap:
   ## @param app.command Override default app container command (useful when using custom images)
   ##
+  # -- command for the celestia-app 
   command:
+    # -- celestia-app start --home $(CELESTIA_HOME)
     - celestia-appd
     - start
     - --home
@@ -538,6 +615,7 @@ app:
   args: []
   ## @param app.automountServiceAccountToken Mount Service Account token in app pods
   ##
+  # -- mount service account token in app pods
   automountServiceAccountToken: false
   ## @param app.hostAliases app pods host aliases
   ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
@@ -720,9 +798,11 @@ app:
 
 ## app service parameters
 ##
+# -- service parameters 
 service:
   ## @param service.internal.type app internal service type
   ##
+  # -- service type, ClusterIP by default 
   internal:
     type: ClusterIP
     ## @param service.internal.ports.api app internal service API port
@@ -731,12 +811,19 @@ service:
     ## @param service.internal.ports.rpc app internal service RPC port
     ## @param service.internal.ports.prometheus app internal service Prometheus port
     ## @param service.internal.ports.tracing app internal service Tracing port
+    # -- ports for the celestia-app 
     ports:
+      # -- api port, 1317 by default  
       api: 1317
+      # -- grpc port, 9090 by default
       grpc: 9090
+      # -- p2p port, 26656 by default
       p2p: 26656
+      # -- rpc port, 26657 by default
       rpc: 26657
+      # -- prometheus port, 26660 by default
       prometheus: 26660
+      # -- tracing port, 26661 by default
       tracing: 26661
     ## @param service.internal.clusterIP app internal service Cluster IP
     ## e.g.:
@@ -760,10 +847,13 @@ service:
 
   ## @param service.external.enabled Enable external service
   ##
+  # -- external service parameters
   external:
+    # -- enable external service, true by default 
     enabled: true
     ## @param service.external.type app external service type
     ##
+    # -- external service type, LoadBalancer by default 
     type: LoadBalancer
     ## @param service.external.ports.api app external service API port
     ## @param service.external.ports.grpc app external service gRPC port
@@ -772,9 +862,13 @@ service:
     ## @param service.external.ports.prometheus app external service Prometheus port
     ## @param service.external.ports.tracing app external service Tracing port
     ports:
+      # -- api port, 1317 by default
       api: 1317
+      # -- grpc port, 9090 by default
       grpc: 9090
+      # -- p2p port, 26656 by default 
       p2p: 26656
+      # -- rpc port, 26657 by default
       rpc: 26657
     ## Node ports to expose
     ## @param service.external.nodePorts.api Node port for API
@@ -785,12 +879,19 @@ service:
     ## @param service.external.nodePorts.tracing Node port for Tracing
     ## NOTE: choose port between <30000-32767>
     ##
+    # -- node ports for the celestia-app
     nodePorts:
+      # -- api port, 1317 by default
       api: ""
+      # -- grpc port, 9090 by default
       grpc: ""
+      # -- p2p port, 26656 by default
       p2p: ""
+      # -- rpc port, 26657 by default
       rpc: ""
+      # -- prometheus port, 26660 by default
       prometheus: ""
+      # -- tracing port, 26661 by default
       tracing: ""
     ## @param service.external.loadBalancerIP app external service Load Balancer IP
     ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
@@ -827,9 +928,14 @@ service:
 ## Network Policies
 ## Ref: https://kubernetes.io/docs/concepts/services-networking/network-policies/
 ##
+# -- network policy, The Policy model to apply. When set to false, only pods with the correct
+# -- server label will have network access to the ports server is listening
+# -- on. When true, server will accept connections from any source
+# -- (with the correct destination port).
 networkPolicy:
   ## @param networkPolicy.enabled Specifies whether a NetworkPolicy should be created
   ##
+  # -- enable network policy, true by default
   enabled: true
   ## @param networkPolicy.allowExternal Don't require server label for connections
   ## The Policy model to apply. When set to false, only pods with the correct
