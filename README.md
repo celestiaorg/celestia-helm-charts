@@ -1,5 +1,9 @@
 # celestia-helm-charts
 
+**Note:** This repository has been moved. Please refer to the new repository for the latest updates and information.
+
+[New Repository: Celestia Helm Charts](https://github.com/celestiaorg/helm-charts)
+
 Helm charts for deploying Celestia Applications on Kubernetes
 
 
